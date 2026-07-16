@@ -1,0 +1,5 @@
+{
+  "description": "agent-forge のルール/スキルを移植した Codex CLI 用プラグイン。",
+  "name": "agent-forge",
+  "skills": "./skills/"
+}
