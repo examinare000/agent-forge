@@ -166,6 +166,15 @@ log_info "--- dist/ からホスト向け指示書をコピー ---"
 copy_once "${REPO_ROOT}/dist/AGENTS.md" "${DEST}/AGENTS.md"
 copy_once "${REPO_ROOT}/dist/GEMINI.md" "${DEST}/GEMINI.md"
 
+# dist/codex-agents/*.toml は Codex CLI がプロジェクト単位で読む資産（.codex/agents/）。
+# installerは~/.claudeにcodex資産を置かない（linkEntriesに無い）ためsymlink先が存在せず、
+# copy/linkどちらのモードでもcopy_onceで実体コピーする。dist/codex-plugin/はプロジェクト単位でなく
+# Codexのプラグイン機構側で読み込むものなのでここでは対象外。
+for toml in "${REPO_ROOT}"/dist/codex-agents/*.toml; do
+  [ -e "${toml}" ] || continue
+  copy_once "${toml}" "${DEST}/.codex/agents/$(basename "${toml}")"
+done
+
 log_info "--- プロジェクト固有設定をコピー ---"
 copy_once "${TEMPLATES_DIR}/mcp.json.template" "${DEST}/.mcp.json"
 copy_once "${TEMPLATES_DIR}/settings.local.json.template" "${DEST}/.claude/settings.local.json"

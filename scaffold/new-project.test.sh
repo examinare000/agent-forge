@@ -152,6 +152,18 @@ fi
 [ -x "${DEST1}/scripts/check-agent-assets.sh" ] && echo "PASS: check-agent-assets.shは実行権限付き" && pass=$((pass + 1)) \
   || { echo "FAIL: check-agent-assets.shに実行権限が無い"; fail=$((fail + 1)); }
 
+# dist/codex-agents/*.toml は installer が ~/.claude に codex 資産を置かない（symlink先が無い）ため、
+# copy/linkどちらのモードでもプロジェクトの.codex/agents/へ実体コピーする。
+codex_agents_count="$(find "${DEST1}/.codex/agents" -maxdepth 1 -type f -name '*.toml' 2>/dev/null | wc -l | tr -d ' ')"
+if [ "${codex_agents_count}" = "8" ]; then
+  echo "PASS: .codex/agents/に8個のtomlがコピーされる"
+  pass=$((pass + 1))
+else
+  echo "FAIL: .codex/agents/のtoml数が8ではない(実際: ${codex_agents_count})"
+  fail=$((fail + 1))
+fi
+assert_exists ".codex/agents/tdd-strict-coder.tomlがコピーされる" "${DEST1}/.codex/agents/tdd-strict-coder.toml"
+
 branch_name="$(git -C "${DEST1}" branch --show-current 2>/dev/null || echo MISSING)"
 if [ "${branch_name}" = "main" ]; then
   echo "PASS: 初期ブランチはmain"
@@ -173,6 +185,10 @@ echo "=== ②: check-agent-assets.sh / check-docs.sh が生成直後のプロジ
 rc=0
 out="$(cd "${DEST1}" && bash scripts/check-agent-assets.sh 2>&1)" || rc=$?
 assert_rc "check-agent-assets.sh: exit 0" 0 "${rc}"
+# .codex/agentsは常に自動配置されるためパリティ検査は実際に発動する（.claude/agentsを
+# project-scopedで持たない既定構成のためスキップ判定に入るが、これはfalse-positiveでは
+# なく意図した挙動であることをスキップ理由の文言で確認する）。
+assert_contains "check-agent-assets.sh: .codex/agentsは常に配置されるがproject-scoped .claude/agentsが無い既定構成のためスキップと判定される" "${out}" "スキップ"
 if [ "${rc}" -ne 0 ]; then
   printf '%s\n' "${out}" | sed 's/^/  /'
 fi

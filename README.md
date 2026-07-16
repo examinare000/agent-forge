@@ -24,7 +24,7 @@ AIコーディングエージェントに規律あるオーケストレーショ
 ## 対応ホスト
 
 - **Claude Code（ネイティブ対応）** — `.claude/` 配下に配置して即運用可能
-- **OpenAI Codex / Gemini CLI** — `dist/` 生成物経由（`generators/build.py` が自動生成、対応済み）
+- **OpenAI Codex / Gemini CLI** — `dist/` 生成物経由（`generators/build.py` が自動生成。`AGENTS.md`/`GEMINI.md` は `forge new` がプロジェクトへ配置、`codex-agents` はプロジェクトの `.codex/agents/` へ自動配置）
 
 ## ステータス
 
