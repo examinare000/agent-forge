@@ -124,6 +124,86 @@ def strip_host_fences(text: str, host: str) -> str:
     return FENCE_RE.sub(_repl, text)
 
 
+def collect_agent_files(agents_dir: Path) -> list[Path]:
+    """agents/直下の.mdファイルをファイル名順に集める（サブディレクトリは対象外）。"""
+    if not agents_dir.is_dir():
+        return []
+    return sorted(p for p in agents_dir.glob("*.md") if p.is_file())
+
+
+def _unescape_yaml_dq(raw: str) -> str:
+    """agents/*.md フロントマターのYAML二重引用符スカラー値を復元する。
+
+    generators/build.py 共通のフロントマターパーサ(FIELD_LINE_RE)はクォート剥がしや
+    エスケープ解決を行わない簡易実装（rules/skills側はunquoted運用のため今まで不要
+    だった）。agents/*.md 側は `name: "..."` / `description: "..."` のようにYAMLの
+    double-quoted scalar を使うため、ここでのみ最小限のエスケープ解決を行う。
+    対応するのは実際にこのリポジトリで使われる2種類のみ:
+      - `\\"` → `"` （埋め込みの引用符）
+      - `\\\\` → `\\` （エスケープされたバックスラッシュ。直後の文字は別トークンとして
+        そのまま残るため、例えば `\\\\n` は「バックスラッシュ1文字+n」という2文字に
+        戻る。実改行(chr(10))には変換しない）
+    他のエスケープ種別(\\t, \\uXXXX 等)はこのリポジトリの記法に出現しないため未対応。
+    """
+    if len(raw) >= 2 and raw[0] == '"' and raw[-1] == '"':
+        raw = raw[1:-1]
+    out: list[str] = []
+    i = 0
+    while i < len(raw):
+        ch = raw[i]
+        if ch == "\\" and i + 1 < len(raw) and raw[i + 1] in ("\\", '"'):
+            out.append(raw[i + 1])
+            i += 2
+        else:
+            out.append(ch)
+            i += 1
+    return "".join(out)
+
+
+def _toml_string(value: str) -> str:
+    """Python文字列をTOML文字列リテラルとして安全にシリアライズする。
+
+    エージェント定義の説明文・本文プロンプトには `"` や `\\` を含む例文が多い。
+    TOMLのリテラル文字列(`'''...'''`)はエスケープ処理を一切行わないため、
+    このデフォルトを使えばバックスラッシュや引用符をそのまま埋め込める
+    （エスケープ漏れ・二重エスケープのバグを構造的に防げる）。
+    内容が `'''` を含む場合のみリテラル文字列を開始できないため、
+    基本複数行文字列(`\"\"\"..\"\"\"`)にフォールバックし `\\` と `"` をエスケープする。
+    """
+    if "'''" not in value:
+        return f"'''{value}'''"
+    escaped = value.replace("\\", "\\\\").replace('"', '\\"')
+    return f'"""{escaped}"""'
+
+
+def _agent_sandbox_mode(tools: list[str]) -> str | None:
+    """agentのtools一覧からCodex側のsandbox_modeを判定する。
+
+    Edit/Writeを持たないエージェントは書き込み不可(read-only)であることを
+    Codex側にも明示する。書き込み可能なエージェントは既定(workspace-write相当)で
+    よいためNoneを返し、sandbox_modeフィールド自体を出力しない。
+    """
+    if "Edit" in tools or "Write" in tools:
+        return None
+    return "read-only"
+
+
+def _agent_reasoning_effort(effort: str | None) -> tuple[str | None, str | None]:
+    """Claude側のeffort frontmatter値をCodexのmodel_reasoning_effortへ変換する。
+
+    Codexの reasoning effort は low/medium/high のみで xhigh に非対応のため、
+    xhigh は対応する最上位 high に意図的に降格し、その理由をコメント文として返す
+    （agentDevTemplateの実例 adversarial-verifier.toml と同じ方針）。
+    effort未指定は「Codex側のデフォルトに委ねる」ことを意味するため、
+    フィールド自体を出力しない(None, None)。
+    """
+    if effort is None:
+        return None, None
+    if effort == "xhigh":
+        return "high", "Claude側はeffort=xhighだが、Codexのreasoning effortはlow/medium/highのみでxhigh非対応のため、対応する最上位highを意図的に維持する。"
+    return effort, None
+
+
 _TOML_TABLE_RE = re.compile(r"^\[\[substitution\]\]\s*$")
 _TOML_KV_RE = re.compile(r"""^(\w+)\s*=\s*(['"])(.*)\2\s*$""")
 
@@ -260,6 +340,59 @@ def render_host_doc(rules_dir: Path, skills_dir: Path, host: str, substitutions:
     return "\n".join(p.strip("\n") for p in parts) + "\n"
 
 
+def render_codex_agent_toml(meta: dict, body: str, host: str, substitutions: list[dict]) -> str:
+    """1エージェント分の`.codex/agents/<name>.toml`本文を組み立てる。
+
+    キー構成は移植元(~/git/agentDevTemplate/.codex/agents/*.toml)の実形式に合わせる:
+    name / description / (任意コメント) / model_reasoning_effort / sandbox_mode /
+    developer_instructions。Codexには存在しない`model: opus/sonnet/haiku`のような
+    厳密な値は出力せず(実在しないmodel IDを名乗ると設定として壊れるため)、
+    tier表現はコメント行にのみ残す。
+    """
+    name = _unescape_yaml_dq(meta.get("name", "")).strip()
+    description = apply_substitutions(_unescape_yaml_dq(meta.get("description", "")), host, substitutions)
+    tools = [t.strip() for t in meta.get("tools", "").split(",") if t.strip()]
+
+    lines = [f"name = {_toml_string(name)}", f"description = {_toml_string(description)}"]
+
+    raw_model = meta.get("model", "").strip()
+    if raw_model:
+        tier_label = apply_substitutions(raw_model, host, substitutions)
+        lines.append(f"# model tier: {tier_label}（正本 agents/*.md の model: {raw_model} 相当）")
+
+    reasoning_effort, effort_comment = _agent_reasoning_effort(meta.get("effort"))
+    if reasoning_effort is not None:
+        if effort_comment:
+            lines.append(f"# {effort_comment}")
+        lines.append(f'model_reasoning_effort = "{reasoning_effort}"')
+
+    sandbox_mode = _agent_sandbox_mode(tools)
+    if sandbox_mode is not None:
+        lines.append(
+            "# 正本 agents/*.md の tools 制約（read-only）を Codex 側で表現するため sandbox を read-only に固定"
+        )
+        lines.append(f'sandbox_mode = "{sandbox_mode}"')
+
+    instructions = apply_substitutions(strip_host_fences(body, host), host, substitutions).strip("\n")
+    lines.append(f"developer_instructions = {_toml_string(instructions)}")
+
+    return "\n".join(lines) + "\n"
+
+
+def build_codex_agents(agents_dir: Path, out_dir: Path, substitutions: list[dict]) -> None:
+    """dist/codex-agents/<name>.toml 一式（agents/*.md のCodexミラー）を生成する。"""
+    agents_out = out_dir / "codex-agents"
+    if agents_out.exists():
+        shutil.rmtree(agents_out)
+    agents_out.mkdir(parents=True)
+
+    for agent_path in collect_agent_files(agents_dir):
+        text = agent_path.read_text(encoding="utf-8")
+        meta, body = parse_frontmatter(text)
+        toml_text = render_codex_agent_toml(meta, body, "codex", substitutions)
+        (agents_out / f"{agent_path.stem}.toml").write_text(toml_text, encoding="utf-8")
+
+
 def build_codex_plugin(skills_dir: Path, out_dir: Path, substitutions: list[dict]) -> None:
     """dist/codex-plugin/ (plugin.json + skills/<name>/SKILL.md 一式)を生成する。"""
     plugin_dir = out_dir / "codex-plugin"
@@ -320,6 +453,15 @@ def lint_dist(out_dir: Path, agents_text: str, gemini_text: str) -> list[str]:
             text = skill_md.read_text(encoding="utf-8")
             label = f"dist/{skill_md.relative_to(out_dir)}"
             violations += lint_text(text, label, LINT_PATTERNS_SKILLS)
+    # codex-agents/*.toml もskillsと同じ狭い集合で検査する(設計どおり)。
+    # エージェント本文もskill本文同様に自然文プロンプトであり、mcp__ツール名や
+    # `codex:`接頭辞等はプロンプト文脈上正当に出現しうるため対象外とする。
+    agents_out = out_dir / "codex-agents"
+    if agents_out.is_dir():
+        for agent_toml in sorted(agents_out.glob("*.toml")):
+            text = agent_toml.read_text(encoding="utf-8")
+            label = f"dist/{agent_toml.relative_to(out_dir)}"
+            violations += lint_text(text, label, LINT_PATTERNS_SKILLS)
     return violations
 
 
@@ -330,6 +472,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rules-dir", type=Path, default=repo_root / "rules")
     parser.add_argument("--skills-dir", type=Path, default=repo_root / "skills")
+    parser.add_argument("--agents-dir", type=Path, default=repo_root / "agents")
     parser.add_argument("--hosts-toml", type=Path, default=script_dir / "hosts.toml")
     parser.add_argument("--out-dir", type=Path, default=repo_root / "dist")
     args = parser.parse_args(argv)
@@ -344,6 +487,7 @@ def main(argv: list[str] | None = None) -> int:
     (args.out_dir / "AGENTS.md").write_text(agents_text, encoding="utf-8")
     (args.out_dir / "GEMINI.md").write_text(gemini_text, encoding="utf-8")
     build_codex_plugin(args.skills_dir, args.out_dir, substitutions)
+    build_codex_agents(args.agents_dir, args.out_dir, substitutions)
 
     violations = lint_dist(args.out_dir, agents_text, gemini_text)
     if violations:

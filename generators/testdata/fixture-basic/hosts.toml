@@ -15,3 +15,17 @@ gemini = "劣化ガイダンス（本ファイル該当節）"
 pattern = 'Agent ツール'
 codex = "逐次プロンプト"
 gemini = "逐次プロンプト"
+
+# エージェント定義(agents/*.md)のmodelフロントマター値(opus/sonnet/haiku)を
+# Codex/Gemini向けの抽象tier表現に変換するための完全一致パターン。
+# フィールド全体(文字列全体)にのみ適用するため`^...$`で完全一致に絞る
+# （body本文中に偶然"opus"等の単語が出現しても誤爆しないようにするため）。
+[[substitution]]
+pattern = '^opus$'
+codex = "最高性能クラス（Claude Opus 相当）"
+gemini = "最高性能クラス（Claude Opus 相当）"
+
+[[substitution]]
+pattern = '^haiku$'
+codex = "軽量クラス（Claude Haiku 相当）"
+gemini = "軽量クラス（Claude Haiku 相当）"

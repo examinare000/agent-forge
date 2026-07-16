@@ -120,3 +120,22 @@ gemini = "外部レビュー相当機構（利用可能なら）"
 pattern = 'Fable'
 codex = "メインエージェント"
 gemini = "メインエージェント"
+
+# 以下3件は agents/*.md の `model` frontmatter値（opus/sonnet/haiku）を
+# dist/codex-agents/*.toml のコメント内で使う抽象tier表現に変換するための専用エントリ。
+# build.render_codex_agent_toml() がフィールド値(文字列全体)に対してのみ適用するため、
+# 完全一致(^...$)に絞る（body本文中に偶然同じ単語が出現しても誤爆しないようにするため）。
+[[substitution]]
+pattern = '^opus$'
+codex = "最高性能クラス（Claude Opus 相当）"
+gemini = "最高性能クラス（Claude Opus 相当）"
+
+[[substitution]]
+pattern = '^sonnet$'
+codex = "標準クラス（Claude Sonnet 相当）"
+gemini = "標準クラス（Claude Sonnet 相当）"
+
+[[substitution]]
+pattern = '^haiku$'
+codex = "軽量クラス（Claude Haiku 相当）"
+gemini = "軽量クラス（Claude Haiku 相当）"
