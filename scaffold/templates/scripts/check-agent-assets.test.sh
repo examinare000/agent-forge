@@ -65,6 +65,20 @@ assert_rc "exit 0" 0 "${rc}"
 assert_contains "スキップ理由が出力される" "${out}" "スキップ"
 
 echo ""
+echo "=== ②a: .codex/agentsのみ存在し.claude/agentsが無ければスキップしexit 0 ==="
+# forge new は既定構成(project-scoped .claude/agentsを持たない)でも常に.codex/agentsを
+# 自動配置するため、.codex/agentsの存在だけをトリガにすると通常のforge new生成直後の
+# プロジェクトが全て「エージェント過剰」判定を受けてしまう回帰。project-scoped .claude/agents
+# を上級者が独自追加した場合にのみパリティ検査を発動させる。
+proj="$(build_project "codex-only-no-claude-agents")"
+mkdir -p "${proj}/.codex/agents"
+printf 'name = %s\ndeveloper_instructions = %s\n' "'''solo-codex-agent'''" "'''dummy'''" > "${proj}/.codex/agents/solo-codex-agent.toml"
+out="$(run_check "${proj}")"
+rc=$?
+assert_rc "exit 0" 0 "${rc}"
+assert_contains "スキップ理由が出力される" "${out}" "スキップ"
+
+echo ""
 echo "=== ②: .codex/agentsがあり.claude/agentsに対応が無ければexit 1(過剰) ==="
 proj="$(build_project "codex-excess")"
 mkdir -p "${proj}/.codex/agents" "${proj}/.claude/agents"

@@ -1,10 +1,13 @@
 #!/usr/bin/env bash
 # エージェント資産の整合性チェック（drift 再発防止）。
 # 本スクリプトは agent-forge の scaffold テンプレート由来（各プロジェクトへコピーされる）。
-# copy モードで生成した新規プロジェクトは .claude/agents / .codex を持たない
-# （エージェント定義は ~/.claude/agents にグローバル配置される）ため、
-# .codex/agents ↔ .claude/agents のパリティ検査は「.codex/agents が存在する場合のみ」実行する
-# （上級者が project-scoped agents を独自追加した場合の drift 検出用）。
+# forge new は copy/link どちらのモードでも dist/codex-agents/*.toml を .codex/agents/ へ
+# 常に自動配置する（エージェント定義自体は ~/.claude/agents にグローバル配置され、
+# project-scoped .claude/agents/ は既定では持たない）。そのため .codex/agents の存在だけを
+# パリティ検査のトリガにすると、通常のforge new生成直後のプロジェクトが全て
+# 「エージェント過剰」判定を受けてしまう。.codex/agents ↔ .claude/agents のパリティ検査は
+# 「両方が存在する場合のみ」実行する（上級者が project-scoped agents を .claude/agents/ にも
+# 独自追加した場合の drift 検出用）。
 #
 # 使い方:   bash scripts/check-agent-assets.sh
 # 終了コード: 0=OK / 1=違反（pre-push を中止すべき）
@@ -25,8 +28,8 @@ echo "🔎 エージェント資産整合性チェック ..."
 echo ""
 echo "  [1/3] エージェント対応表を確認中..."
 
-if [ ! -d "$ROOT/.codex/agents" ]; then
-  echo "  ℹ️  .codex/agents が無いためエージェント対応表チェックをスキップします（copyモードの既定構成）。"
+if [ ! -d "$ROOT/.codex/agents" ] || [ ! -d "$ROOT/.claude/agents" ]; then
+  echo "  ℹ️  .codex/agents または .claude/agents が無いためエージェント対応表チェックをスキップします（既定構成: エージェント定義は ~/.claude/agents にグローバル配置）。"
 else
   declare -a claude_agents
   while IFS= read -r f; do
