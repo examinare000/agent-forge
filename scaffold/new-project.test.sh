@@ -180,6 +180,23 @@ else
   pass=$((pass + 1))
 fi
 
+# 初回スキャフォールド完了直後の状態を1コミットとして記録する（移植元 agentDevTemplate と同挙動）。
+commit_count1="$(git -C "${DEST1}" log --oneline 2>/dev/null | wc -l | tr -d ' ')"
+if [ "${commit_count1}" = "1" ]; then
+  echo "PASS: 初回実行後に1コミットが存在する"
+  pass=$((pass + 1))
+else
+  echo "FAIL: 初回実行後のコミット数が1ではない(実際: ${commit_count1})"
+  fail=$((fail + 1))
+fi
+if [ -z "$(git -C "${DEST1}" status --porcelain 2>/dev/null)" ]; then
+  echo "PASS: 初回実行後のworking treeはclean"
+  pass=$((pass + 1))
+else
+  echo "FAIL: 初回実行後のworking treeがcleanではない"
+  fail=$((fail + 1))
+fi
+
 echo ""
 echo "=== ②: check-agent-assets.sh / check-docs.sh が生成直後のプロジェクトに対してexit 0 ==="
 rc=0
@@ -252,7 +269,25 @@ assert_rc "既存repo内部への作成: exit 1" 1 "${rc}"
 assert_contains "既存repo内部への作成: エラーメッセージに既存リポジトリである旨が出る" "${out}" "既存のgitリポジトリの内部"
 
 echo ""
-echo "=== ⑧: 引数不足はexit 1でusageを表示する ==="
+echo "=== ⑧: 既存gitリポジトリ(.git所有)への実行はgit初期化・初期コミットの両方をスキップする ==="
+DEST5="${WORKDIR}/proj-existing-git"
+mkdir -p "${DEST5}"
+git -C "${DEST5}" init --quiet -b main
+out="$(run_new_project "${DEST5}" "${EMPTY_CLAUDE_DIR}")"
+rc=$?
+assert_rc "既存gitリポジトリへの実行: exit 0" 0 "${rc}"
+assert_contains "既存gitリポジトリへの実行: 初期化をスキップする" "${out}" "既に git リポジトリのため初期化をスキップします"
+commit_count5="$(git -C "${DEST5}" log --oneline 2>/dev/null | wc -l | tr -d ' ')"
+if [ "${commit_count5:-0}" = "0" ]; then
+  echo "PASS: 既存gitリポジトリでは初期コミットを追加しない"
+  pass=$((pass + 1))
+else
+  echo "FAIL: 既存gitリポジトリなのに初期コミットが追加された(コミット数: ${commit_count5})"
+  fail=$((fail + 1))
+fi
+
+echo ""
+echo "=== ⑨: 引数不足はexit 1でusageを表示する ==="
 rc=0
 out="$("${BASH_BIN}" "${NEW_PROJECT_SH}" 2>&1)" || rc=$?
 assert_rc "引数無し: exit 1" 1 "${rc}"

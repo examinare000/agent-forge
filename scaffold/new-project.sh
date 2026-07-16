@@ -224,6 +224,17 @@ if [ -d "${DEST}/.git" ]; then
 else
   log_info "--- git初期化（main） ---"
   git -C "${DEST}" init --quiet -b main
+  # 初回スキャフォールド完了直後の状態を1コミットとして記録する（移植元
+  # agentDevTemplate の create_new_project.sh と同挙動）。以後の開発差分と生成物を
+  # 明確に切り分け、生成直後に `git status` が差分ゼロの状態から開発を始められるようにする。
+  # 上のgit init分岐と同じ枝でのみ実行するため、既存repoへ本コマンドがコミットを
+  # 追加することはない（既存repoスキップ時はコミットもスキップされる）。
+  # commitはuser.name/user.email未設定環境で失敗しうるため、移植元同様に失敗を
+  # スクリプト全体の失敗として扱わず警告に留める（scaffold自体は生成済みのため）。
+  git -C "${DEST}" add -A
+  if ! git -C "${DEST}" commit --quiet -m "agent-forgeによる初期スキャフォールド"; then
+    log_info "注意: 初期コミットに失敗しました（git user.name/user.emailが未設定の可能性）。手動でコミットしてください。"
+  fi
 fi
 
 log_info "完了: ${DEST}"
