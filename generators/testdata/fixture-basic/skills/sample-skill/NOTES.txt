@@ -1,0 +1,1 @@
+補助メモファイル。SKILL.md以外の補助ファイルもcodex-pluginへコピーされることを確認するためのfixture。

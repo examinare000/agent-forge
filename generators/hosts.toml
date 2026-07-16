@@ -1,0 +1,122 @@
+# ホスト別置換テーブル（generators/build.py が読み込む）。
+#
+# 各エントリは Claude Code 固有の語句・パスを、Codex CLI / Gemini CLI 向けの
+# 一般的な表現へ書き換えるための正規表現ルール。
+#
+# 重要: エントリの並び順が置換の適用順（先勝ち）になる。より限定的な
+# パターン（例: rules/hosts/claude/ 配下のファイル参照）は、より汎用的な
+# パターン（例: rules/ 配下全般の参照）より先に置かなければならない
+# （先に消費されないと汎用パターンに誤って再マッチしてしまうため）。
+#
+# pattern は Python の re.sub にそのまま渡す正規表現（TOML の literal
+# string = シングルクォートで書き、バックスラッシュはエスケープ不要）。
+# codex / gemini は置換後の文字列（両ホストで同じ文言でよい場合が多い）。
+
+[[substitution]]
+# 「フック整合」節は host:claude フェンスで生成物から除外されるため、
+# 節へのリンクは死リンク化する。全角括弧で囲まれた参照はまるごと注記に置換する。
+pattern = '（\[フック整合\]\(#[^)]*\)[^）]*）'
+codex = "（Claude ホスト固有のフック機構に関する節。本ホストには該当なし）"
+gemini = "（Claude ホスト固有のフック機構に関する節。本ホストには該当なし）"
+
+[[substitution]]
+# 括弧に囲まれていない裸のリンク（「詳細は[フック整合](#...)。」等）のフォールバック。
+pattern = '\[フック整合\]\(#[^)]*\)'
+codex = "Claude ホスト固有のフック機構に関する節（本ホストには該当なし）"
+gemini = "Claude ホスト固有のフック機構に関する節（本ホストには該当なし）"
+
+[[substitution]]
+pattern = 'mcp__shelf__consult'
+codex = "shelf MCP（導入環境のみ。未導入なら省略）"
+gemini = "shelf MCP（導入環境のみ。未導入なら省略）"
+
+[[substitution]]
+# 上記で個別に処理しきれない mcp__ ツール名の汎用フォールバック。
+pattern = 'mcp__[A-Za-z0-9_]+'
+codex = "対応 MCP ツール（導入環境のみ。未導入なら省略）"
+gemini = "対応 MCP ツール（導入環境のみ。未導入なら省略）"
+
+[[substitution]]
+# rules/hosts/claude/ 配下は位置により生成物から除外されるファイルなので、
+# それらへの参照は「本ファイル該当節」ではなく劣化ガイダンス参照に倒す。
+pattern = '~/\.claude/rules/hosts/claude/[\w\-./]+\.md'
+codex = "本ファイル該当節（劣化ガイダンス参照）"
+gemini = "本ファイル該当節（劣化ガイダンス参照）"
+
+[[substitution]]
+pattern = '~/\.claude/agents/[\w\-./]*'
+codex = "劣化ガイダンス（本ファイル該当節）"
+gemini = "劣化ガイダンス（本ファイル該当節）"
+
+[[substitution]]
+pattern = '~/\.claude/skills/'
+codex = "各ホストのスキル配置先"
+gemini = "各ホストのスキル配置先"
+
+[[substitution]]
+pattern = '~/\.claude/lessons/inbox/[\w\-./<>]*'
+codex = "教訓記録先（各ホストの運用に依存）"
+gemini = "教訓記録先（各ホストの運用に依存）"
+
+[[substitution]]
+pattern = '~/\.claude/corpus/'
+codex = "セッションログ蓄積先（recall 相当機構導入時のみ）"
+gemini = "セッションログ蓄積先（recall 相当機構導入時のみ）"
+
+[[substitution]]
+pattern = '~/\.claude/settings\.json'
+codex = "各ホストの設定ファイル"
+gemini = "各ホストの設定ファイル"
+
+[[substitution]]
+pattern = '~/\.claude/hooks/'
+codex = "各ホストのフック機構（存在する場合）"
+gemini = "各ホストのフック機構（存在する場合）"
+
+[[substitution]]
+# 上記の個別パターンで消費されなかった「rules/ 配下の共通ルールファイル」への
+# 参照。共通ルールは AGENTS.md / GEMINI.md 内に番号順で連結されているので、
+# 「本ファイル内の該当節を見よ」という案内に置き換える。
+pattern = '~/\.claude/rules/[\w\-./]+\.md'
+codex = "AGENTS.md 内の該当節"
+gemini = "GEMINI.md 内の該当節"
+
+[[substitution]]
+# 最終セーフティネット。ここまでの個別パターンに一致しなかった ~/.claude
+# 参照が万一残っていた場合の汎用フォールバック（lint 検知の取りこぼし防止）。
+pattern = '~/\.claude[\w\-./]*'
+codex = "本フレームワークの設定ディレクトリ相当"
+gemini = "本フレームワークの設定ディレクトリ相当"
+
+[[substitution]]
+# フック整合セクションへのリンク。フェンス内容（Claude 固有）のため、
+# 他ホストではセクションが存在しない。括弧書き説明に置換。
+pattern = '\[フック整合\]\(#フック整合メインとリポジトリ\)'
+codex = "(Claude ホスト固有のフック機構に関する節)"
+gemini = "(Claude ホスト固有のフック機構に関する節)"
+
+[[substitution]]
+pattern = 'Agent ツール'
+codex = "逐次プロンプト"
+gemini = "逐次プロンプト"
+
+[[substitution]]
+pattern = 'Task ツール'
+codex = "逐次プロンプト"
+gemini = "逐次プロンプト"
+
+[[substitution]]
+pattern = 'codex:codex-rescue'
+codex = "外部ベンダー相当ツール（利用可能なら）"
+gemini = "外部ベンダー相当ツール（利用可能なら）"
+
+[[substitution]]
+pattern = '/codex:review'
+codex = "外部レビュー相当機構（利用可能なら）"
+gemini = "外部レビュー相当機構（利用可能なら）"
+
+[[substitution]]
+# 現状の rules/skills には出現しないが、将来の混入を安全側で吸収する。
+pattern = 'Fable'
+codex = "メインエージェント"
+gemini = "メインエージェント"

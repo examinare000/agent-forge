@@ -1,0 +1,17 @@
+# selftest.sh 専用の最小置換テーブル（本番の generators/hosts.toml とは独立）。
+# 意図的に規則数を絞り、テストの意図を読みやすくする。
+
+[[substitution]]
+pattern = 'mcp__shelf__consult'
+codex = "shelf MCP（導入環境のみ）"
+gemini = "shelf MCP（導入環境のみ）"
+
+[[substitution]]
+pattern = '~/\.claude/agents/[\w\-./]*'
+codex = "劣化ガイダンス（本ファイル該当節）"
+gemini = "劣化ガイダンス（本ファイル該当節）"
+
+[[substitution]]
+pattern = 'Agent ツール'
+codex = "逐次プロンプト"
+gemini = "逐次プロンプト"
