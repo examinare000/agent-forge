@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+
+# 依存関係・ビルド成果物（各言語の一般的な既定値）
+node_modules/
+dist/
+build/

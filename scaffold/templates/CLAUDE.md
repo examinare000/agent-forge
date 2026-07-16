@@ -1,0 +1,19 @@
+# CLAUDE.md — {{PROJECT_NAME}}
+
+このファイルはプロジェクトへの薄い入口です。エージェント挙動の正本は
+[agent-forge](https://github.com/) が `~/.claude/` 配下にグローバル導入する
+ルール・スキル・サブエージェント定義であり、ここでは重複させません。
+
+## ルーティング
+
+- 共通ルール一覧・優先順位: `~/.claude/rules/README.md`
+- 憲法（矛盾時に常に最優先）: `~/.claude/rules/00-core-principles.md`
+- パススコープ付きルール（このプロジェクト内）: `.claude/rules/testing.md` /
+  `.claude/rules/frontend.md` / `.claude/rules/docker.md`
+- サブエージェント定義: `~/.claude/agents/`
+- スキル: `~/.claude/skills/`
+
+## 前提
+
+agent-forge が未導入（`~/.claude/rules` が存在しない）の場合は、先に
+`forge install` を実行してください。導入状態は `forge check` で確認できます。
