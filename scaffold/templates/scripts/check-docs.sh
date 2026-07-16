@@ -60,7 +60,7 @@ while IFS= read -r line; do
   stem="${base%.html}"
   if [ -f "$DESIGN/$stem.md" ] || [ ! -f "$DESIGN/$base" ]; then
     echo "❌ 要修正の design HTML リンク: $line"
-    note "$DESIGN/$stem.md があれば .md へ張り替え。$DESIGN/$base が無ければ削除済みリンクです。"
+    note "$DESIGN/$stem.md があれば .md へ張り替え。$DESIGN/$base が無ければ削除済みリンクです（~/.claude/rules/30-documentation-management.md 参照）。"
     fail=1
   fi
 done < <(grep -rnE '\]\([^)]*design/[^)]*\.html[^)]*\)' --include='*.md' docs 2>/dev/null || true)
