@@ -1,0 +1,80 @@
+#!/usr/bin/env bash
+# agent-forge の統一CLIディスパッチャ。
+#
+# なぜ薄いディスパッチャなのか:
+# installer/install.sh・scaffold/new-project.sh・各プロジェクトの
+# scripts/check-agent-assets.sh はそれぞれ独立に動く既存スクリプトであり、
+# ここでロジックを持たず「引数をそのまま透過して呼び分ける」だけに徹する
+# （二重実装・二重メンテナンスを避ける）。
+#
+# 使い方:
+#   forge install [install.shへの引数...]   ~/.claude へ導入/更新/検査
+#   forge new <dir> [new-project.shへの引数...]  新規プロジェクト雛形を生成
+#   forge check [<dir>]                      引数無し: install.sh --check
+#                                             dir指定: そのプロジェクトのcheck-agent-assets.shを実行
+#   forge help                               このヘルプを表示
+set -uo pipefail
+
+BIN_SH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+REPO_ROOT="$(cd "${BIN_SH_DIR}/.." && pwd -P)"
+
+usage() {
+  cat <<'EOF'
+使い方: forge <command> [args...]
+
+コマンド:
+  install [args...]   installer/install.sh へ引数を透過して実行する
+  new <dir> [args...]  scaffold/new-project.sh へ引数を透過して実行する
+  check [<dir>]        引数無し: install.sh --check（~/.claudeの導入状態を検査）
+                        dir指定: <dir>/scripts/check-agent-assets.sh を実行
+  help                 このヘルプを表示
+
+例:
+  forge install --check
+  forge new ~/git/my-app --name my-app --mode copy
+  forge check
+  forge check ~/git/my-app
+EOF
+}
+
+if [ "$#" -lt 1 ]; then
+  usage
+  exit 1
+fi
+
+command_name="$1"
+shift
+
+case "${command_name}" in
+  install)
+    exec bash "${REPO_ROOT}/installer/install.sh" "$@"
+    ;;
+  new)
+    if [ "$#" -lt 1 ]; then
+      echo "エラー: forge new <dir> [args...] には作成先ディレクトリが必要です" >&2
+      exit 1
+    fi
+    exec bash "${REPO_ROOT}/scaffold/new-project.sh" "$@"
+    ;;
+  check)
+    if [ "$#" -eq 0 ]; then
+      exec bash "${REPO_ROOT}/installer/install.sh" --check
+    fi
+    project_dir="$1"
+    check_script="${project_dir}/scripts/check-agent-assets.sh"
+    if [ ! -f "${check_script}" ]; then
+      echo "エラー: ${check_script} が見つかりません（'forge new' で生成したプロジェクトか確認してください）" >&2
+      exit 1
+    fi
+    exec bash "${check_script}"
+    ;;
+  help | -h | --help)
+    usage
+    exit 0
+    ;;
+  *)
+    echo "不明なコマンドです: ${command_name}" >&2
+    usage
+    exit 1
+    ;;
+esac
