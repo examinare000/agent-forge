@@ -8,8 +8,7 @@
 
 - 共通ルール一覧・優先順位: `~/.claude/rules/README.md`
 - 憲法（矛盾時に常に最優先）: `~/.claude/rules/00-core-principles.md`
-- パススコープ付きルール（このプロジェクト内）: `.claude/rules/testing.md` /
-  `.claude/rules/frontend.md` / `.claude/rules/docker.md`
+- パススコープ付きルール（このプロジェクト内・自分の規約を追加する場所）: `.claude/rules/README.md`
 - サブエージェント定義: `~/.claude/agents/`
 - スキル: `~/.claude/skills/`
 

@@ -108,33 +108,19 @@ else
   done
 fi
 
-# 3) .claude/rules/ の3パススコープファイルの健全性（symlink/copyどちらのモードでも成立させる）
+# 3) .claude/rules/README.md の健全性（forge new がcopy/linkどちらのモードでも常に
+#    実体コピーする「自分の規約をここに置く」導線ファイル。symlink化はしない設計）
 echo ""
-echo "  [3/3] .claude/rules/ のパススコープ参照ファイルを確認中..."
-declare -a rule_refs=(testing frontend docker)
-for rule in "${rule_refs[@]}"; do
-  rule_file="$ROOT/.claude/rules/$rule.md"
-  if [ ! -e "$rule_file" ] && [ ! -L "$rule_file" ]; then
-    echo "❌ ルール参照ファイル欠落: $rule_file が存在しません"
-    note "forge new が生成する .claude/rules/$rule.md が削除されていないか確認してください。"
-    fail=1
-    continue
-  fi
-  if [ -L "$rule_file" ]; then
-    if [ ! -e "$rule_file" ]; then
-      echo "❌ ルール参照 symlink 切断: $rule_file が指すファイルが存在しません（$(readlink "$rule_file")）"
-      note "linkモードの前提である ~/.claude/rules/ が導入済みか確認してください（forge install）。"
-      fail=1
-    fi
-  elif [ ! -s "$rule_file" ]; then
-    echo "❌ ルール参照ファイルが空です: $rule_file"
-    fail=1
-  elif ! grep -q '^paths:' "$rule_file"; then
-    echo "❌ ルール参照ファイルに paths: frontmatterがありません: $rule_file"
-    note "Claude Codeのnative path-scoped rule機構向けにpaths:を維持してください。"
-    fail=1
-  fi
-done
+echo "  [3/3] .claude/rules/README.md を確認中..."
+rule_readme="$ROOT/.claude/rules/README.md"
+if [ ! -e "$rule_readme" ]; then
+  echo "❌ .claude/rules/README.md が存在しません"
+  note "forge new が生成する .claude/rules/README.md が削除されていないか確認してください。"
+  fail=1
+elif [ ! -s "$rule_readme" ]; then
+  echo "❌ .claude/rules/README.md が空です"
+  fail=1
+fi
 
 # 完了
 echo ""

@@ -203,20 +203,20 @@ else
   log_info "skip(既存): README.md"
 fi
 
-# --- 2) モード依存の成果物（CLAUDE.md・.claude/rules/*） ----------------------
+# --- 2) モード依存の成果物（CLAUDE.md） -----------------------------------------
 if [ "${MODE}" = "copy" ]; then
-  log_info "--- copyモード: CLAUDE.md / .claude/rules/ を自己完結コピー ---"
+  log_info "--- copyモード: CLAUDE.md を自己完結コピー ---"
   render_copy_once "${TEMPLATES_DIR}/CLAUDE.md" "${DEST}/CLAUDE.md"
-  copy_once "${TEMPLATES_DIR}/claude-rules/testing.md" "${DEST}/.claude/rules/testing.md"
-  copy_once "${TEMPLATES_DIR}/claude-rules/frontend.md" "${DEST}/.claude/rules/frontend.md"
-  copy_once "${TEMPLATES_DIR}/claude-rules/docker.md" "${DEST}/.claude/rules/docker.md"
 else
-  log_info "--- linkモード: CLAUDE.md / .claude/rules/ を ~/.claude/ へ絶対symlink ---"
+  log_info "--- linkモード: CLAUDE.md を ~/.claude/ へ絶対symlink ---"
   link_abs "${CLAUDE_DIR}/CLAUDE.core.md" "${DEST}/CLAUDE.md"
-  link_abs "${CLAUDE_DIR}/rules/11-testing-strategy.md" "${DEST}/.claude/rules/testing.md"
-  link_abs "${CLAUDE_DIR}/rules/15-frontend-design.md" "${DEST}/.claude/rules/frontend.md"
-  link_abs "${CLAUDE_DIR}/rules/70-docker-environments.md" "${DEST}/.claude/rules/docker.md"
 fi
+
+# .claude/rules/README.mdは「自分の規約をここに置く」導線であり、~/.claude/rules/側に
+# 対応するsymlink先実体が無い（installerのlinkEntriesに無い）ため、copy/linkどちらの
+# モードでも常に実体コピーする（AGENTS.md/GEMINI.md等と同じ扱い）。
+log_info "--- .claude/rules/README.md を常にコピー ---"
+copy_once "${TEMPLATES_DIR}/claude-rules/README.md" "${DEST}/.claude/rules/README.md"
 
 # --- 3) git初期化（mainのみ。developは作らない） -------------------------------
 if [ -d "${DEST}/.git" ]; then
