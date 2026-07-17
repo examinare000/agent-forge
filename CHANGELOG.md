@@ -19,10 +19,17 @@
 - N/A
 
 ### Fixed
-- 第三者由来スキルの帰属表記を是正（frontend-design のライセンスを Apache-2.0 / Anthropic に訂正、baseline-ui に ibelick/ui-skills の MIT ライセンス全文を同梱）
+- N/A
 
 ### Security
 - N/A
+
+## [0.2.1] - 2026-07-17
+
+同梱スキルの帰属表記を是正するパッチリリース。
+
+### Fixed
+- 第三者由来スキルの帰属表記を是正（frontend-design のライセンスを Apache-2.0 / Anthropic に訂正、baseline-ui に ibelick/ui-skills の MIT ライセンス全文を同梱）
 
 ## [0.2.0] - 2026-07-17
 
