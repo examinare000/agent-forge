@@ -18,8 +18,7 @@ CIやcronに自動組み込みしないこと。実行タイミングの目安:
 
 - モデル更新時（例: デフォルトモデルのバージョンアップ）
 - エージェント定義変更時（`agents/*.md` の編集後）
-- 委譲強制フック等、エージェントの挙動に影響するフック変更時
-  （例: `hooks/delegate-git-to-composer.sh`）
+- エージェントの挙動に影響するフック変更時
 
 ## 実行方法
 
@@ -99,7 +98,7 @@ run_task() {
 |---|---|
 | `tasks/git-composer-atomic-split.task.sh` | git-composerがテスト/実装/docs混在の未コミット変更をアトミック分割コミットできるか |
 | `tasks/adversarial-verifier-refute.task.sh` | adversarial-verifierが「importなしのassert Trueのみで完了宣言」という明確な欠陥を見抜けるか |
-| `tasks/coder-commit-handoff.task.sh` | tdd-strict-coderが（git委譲強制フックにより）自分でコミットせずgit-composerへの委譲を報告するか |
+| `tasks/coder-commit-handoff.task.sh` | tdd-strict-coderが（エージェント定義の規律により）自分でコミットせずgit-composerへの委譲を報告するか |
 
 ## セルフテスト
 
