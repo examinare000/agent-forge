@@ -1,23 +1,30 @@
 # agent-forge
 
-**agent-forge** — A discipline framework for AI coding agents (Claude Code, OpenAI Codex, Gemini CLI). Rules, skills, subagents, hooks, and evals for orchestrator-style agent operation. Documentation is in Japanese.
+**agent-forge** is an open-source bootstrap framework that automatically configures AI coding agents to follow a naming-convention-organized `agent-rules` set, so they autonomously handle model selection, task decomposition, delegation, and self-improvement loops. It packages rules, skills, subagents, hooks, and evals into a disciplined, orchestrator-style operating model for Claude Code, OpenAI Codex, and Gemini CLI. One installer sets up your global environment; one scaffold command spins up a new project that uses it from day one. The core intentionally excludes personal engineering preferences (git strategy, testing strategy, Docker, frontend design) — the numbered rule bands are left open for adopters to add their own conventions. Whether you're starting your first AI-driven build or hardening an existing one, agent-forge gets you a working baseline in minutes. Documentation below is in Japanese.
 
 ---
 
 ## 概要
 
-AIコーディングエージェントに規律あるオーケストレーション運用を与えるフレームワークです。
+命名規則で整理された `agent-rules` により、AIコーディングエージェントがモデル選択・作業分解・タスク委譲・自己改善ループを自律的に回す設定を自動で行うフレームワークです。個人の工学的嗜好（git戦略・テスト戦略・Docker・フロントエンド設計）はコアから外し、番号体系は採用者が自分の規約を追加する受け皿として残します。これからAI駆動で開発やビジネスを始める人が、最短で「規律ある運用」から着手できることを目指しています。中身は次の「何が手に入るか」を参照してください。
 
-- **rules/** — エージェント設計の規範・戦略（コア原則、git戦略、テスト戦略、セキュリティ、深度推論等）
-- **skills/** — 手続き化された作業フロー（TDD、コードレビュー、ブランチ完結、検証等）
-- **agents/** — サブエージェント定義（アーキテクト、コーダー、テスト実行者、レビュワー等）
-- **hooks/** — git操作・編集の強制ゲート（保護ブランチ、デバッグログ残留検出、コンポーザー委譲等）
-- **evals/** — エージェント挙動の回帰テスト基盤（決定的アサート、確認ゲート付き）
+## 何が手に入るか
+
+| 資産 | 役割 | 内容 |
+|---|---|---|
+| `rules/` | 規範 | エージェントが常に従うべきホスト非依存の基盤原則（コア原則・モデルティア・セキュリティ・深度推論等）。`10-29`（ワークフロー）・`70-89`（言語/環境）は採用者が自分の工学規約を追加する意図的な空き番帯 |
+| `skills/` | 手続き | 特定作業の実行手順を型化したスキル（レビュー・ブランチ完結など） |
+| `agents/` | サブエージェント（8体） | アーキテクト・TDDコーダー・実装コーダー・テスト実行・コードレビュワー・gitコミット担当・反証検証者・アンチパターンレビュワーの8役に分かれたサブエージェント定義 |
+| `hooks/` | 強制ゲート（3本） | デバッグログ残留検出・コンパクト前バックアップ・編集後lintなど、規約を機械的に強制するフック |
+| `evals/` | 挙動回帰 | エージェント/スキルのゴールデンタスクを実際の `claude` CLI で手動実行し、決定的アサートのみで退行を検出する回帰基盤 |
+| `installer/` | ユーザー環境導入 | `~/.claude/` へ rules・skills・agents・hooks を絶対パスsymlinkで導入・検査（doctor）・アンインストールするインストーラ |
+| `scaffold/` + `bin/forge` | 新規プロジェクト生成 | `forge new` で任意ディレクトリに新規プロジェクトの雛形（CLAUDE.md・.mcp.json・AGENTS.md等）を生成する統一CLI |
+| `generators/` + `dist/` | Codex・Gemini向け生成物 | rules/skillsを素材に `dist/AGENTS.md`・`dist/GEMINI.md`・Codexプラグイン・Codexエージェント定義を自動生成 |
 
 ## 対応ホスト
 
 - **Claude Code（ネイティブ対応）** — `.claude/` 配下に配置して即運用可能
-- **OpenAI Codex / Gemini CLI** — `dist/` 生成物経由（準備中）
+- **OpenAI Codex / Gemini CLI** — `dist/` 生成物経由（`generators/build.py` が自動生成。`AGENTS.md`/`GEMINI.md` は `forge new` がプロジェクトへ配置、`codex-agents` はプロジェクトの `.codex/agents/` へ自動配置）
 
 ## ステータス
 
@@ -27,17 +34,16 @@ v0.1.0 開発中
 
 ```
 agent-forge/
-├── rules/                          # 規範・戦略ドキュメント
+├── bin/                            # 統一CLI
+│   └── forge                      # install/new/check の薄いディスパッチャ
+├── rules/                          # 規範・戦略ドキュメント（10-29・70-89は採用者が追加する意図的な空き番帯）
 │   ├── 00-core-principles.md      # コア原則
+│   ├── 02-model-fallback-matrix.md # モデルティア運用マトリクス
 │   ├── 03-agent-behavior.md       # エージェント挙動規範
-│   ├── 10-git-strategy.md         # Git戦略
-│   ├── 11-testing-strategy.md     # テスト戦略
 │   ├── 12-security-guidelines.md  # セキュリティ
 │   ├── 13-readability.md          # 可読性
-│   ├── 15-frontend-design.md      # フロントエンド設計
 │   ├── 30-documentation-management.md  # ドキュメント管理
 │   ├── 50-production-reliability.md    # 本番信頼性
-│   ├── 70-docker-environments.md       # Docker環境
 │   ├── 93-deep-reasoning-protocol.md   # 深度推論プロトコル
 │   ├── 94-self-improvement-protocol.md  # 自己改善プロトコル
 │   ├── hosts/claude/              # Claude固有の規範
@@ -62,13 +68,10 @@ agent-forge/
 │   ├── git-composer.md
 │   ├── adversarial-verifier.md
 │   └── ai-antipattern-reviewer.md
-├── hooks/                         # Gitフック・編集ゲート
+├── hooks/                         # 編集ゲート
 │   ├── backup-before-compact.sh
 │   ├── block-debug-log-residue.sh
 │   ├── block-debug-log-residue.test.sh
-│   ├── block-protected-branch-commit.sh
-│   ├── delegate-git-to-composer.sh
-│   ├── delegate-git-to-composer.test.sh
 │   └── lint-after-edit.sh
 ├── evals/                         # 回帰テスト
 │   ├── run-evals.sh
@@ -76,24 +79,43 @@ agent-forge/
 │   ├── README.md
 │   └── tasks/
 ├── claude/                        # Claude Code用設定（.claudeから参照）
-├── installer/                     # インストール関連
-├── generators/                    # コード生成
-├── dist/                          # 生成物・配布
+├── installer/                     # インストール関連（install.sh・manifest.json等）
+├── scaffold/                      # 新規プロジェクト雛形生成（new-project.sh・templates/）
+├── generators/                    # 多ベンダー向け指示ファイル生成器（build.py）
+├── dist/                          # 生成物・配布（AGENTS.md・GEMINI.md・codex-plugin/・codex-agents/）
 ├── LICENSE
 ├── README.md
 ├── CONTRIBUTING.md
 └── CHANGELOG.md
 ```
 
-## セットアップ
+## 15分クイックスタート
 
-Claude Code のプロジェクト設定で agent-forge を参照：
+### 前提
+
+- `git` / `jq` / `claude`（Claude Code CLI）が必要です。未導入の場合は `installer/manifest.json` の `prereqs.installHints`（OS別コマンド）を参照してください。
+- 任意: `gh` / `uv` / `node` / `codex` / `gemini`（無くても動作しますが、Codex/Gemini対応まで進めるなら推奨）
+
+### 手順
 
 ```bash
-ln -s <clone位置>/agent-forge/{rules,skills,agents,hooks,evals} ~/.claude/
+# 1. clone
+git clone https://github.com/examinare000/agent-forge.git ~/git/agent-forge
+cd ~/git/agent-forge
+
+# 2. ~/.claude へ rules/skills/agents/hooks を導入（グローバル・絶対パスsymlink）
+./bin/forge install
+
+# 3. 新規プロジェクトの雛形を作成（既定: copyモード・自己完結）
+./bin/forge new ~/projects/my-app
+
+# 4. 開発を開始
+cd ~/projects/my-app && claude
 ```
 
-（詳細は `installer/` 配下のセットアップスクリプトを準備中）
+- `forge install --check` はいつでも read-only で導入状態を診断できます（doctorモード。`~/.claude` のsymlink健全性・prereqs CLI・superpowers・settings.jsonを検査）。
+- `forge new` は git初期化（`main`のみ）・`AGENTS.md`/`GEMINI.md`のコピー・`.mcp.json`等のプロジェクト固有設定・`scripts/check-agent-assets.sh`の設置までを一括で行います。既存ファイルは上書きしないため再実行しても安全です。
+- 生成したプロジェクトの状態は `forge check ~/projects/my-app`（または `cd ~/projects/my-app && bash scripts/check-agent-assets.sh`）でいつでも検証できます。
 
 ## 使用例
 
@@ -114,6 +136,28 @@ Claude Code: /review-ai-antipattern
 Claude Code: /finishing-a-development-branch
 → テスト通過確認 → プリコミットチェック → ブランチ保護 → PR作成まで自動化
 ```
+
+## 発展
+
+### `--mode link`（上級者向け・installer導入済み前提）
+
+`forge install` 済みであれば、`forge new <dir> --mode link` で `CLAUDE.md` を `~/.claude/CLAUDE.core.md` へ絶対パスsymlinkとして張ります。ルール更新が生成済みの全プロジェクトへ即座に波及するため、複数プロジェクトを横断管理する場合に向きます。`.claude/rules/README.md`（自分の規約を追加する導線）はcopy/linkどちらのモードでも常に実体コピーします。`forge install` が未実施の環境では明示的にエラーで停止します。
+
+### Codex / Gemini CLI ユーザー向け
+
+Claude Code以外のホストは `generators/build.py` が `rules/`・`skills/` から生成した `dist/` の成果物を使います。
+
+- `dist/AGENTS.md` — Codex CLI 向けの統合ルール
+- `dist/GEMINI.md` — Gemini CLI 向けの統合ルール
+- `dist/codex-plugin/` — Codex CLI のプラグインとして読み込めるskill群（`plugin.json` + `skills/`）
+- `dist/codex-agents/` — Codex用エージェント定義（`.toml`。`agents/` の8体に対応）
+
+`forge new` はcopy/linkいずれのモードでも `dist/AGENTS.md`・`dist/GEMINI.md` を生成先プロジェクトへ自動コピーします。再生成が必要な場合は `python3 generators/build.py` を実行してください（`dist/` 配下は直接編集しない）。
+
+### コンパニオンプロジェクト
+
+- **agent-recall**（`../agent-recall`）— セッションの教訓・振り返りを蓄積し自己改善サイクルに繋げるプラグイン（URL: `https://github.com/examinare000/agent-recall`）
+- **agent-shelf**（`../agent-shelf`）— 書籍・ドキュメントのコーパスに対するcited Q&A形式のRAG知識書庫MCP（URL: `https://github.com/examinare000/agent-shelf`）
 
 ## Third-party notices
 

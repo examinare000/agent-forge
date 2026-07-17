@@ -1,0 +1,31 @@
+# selftest.sh 専用の最小置換テーブル（本番の generators/hosts.toml とは独立）。
+# 意図的に規則数を絞り、テストの意図を読みやすくする。
+
+[[substitution]]
+pattern = 'mcp__shelf__consult'
+codex = "shelf MCP（導入環境のみ）"
+gemini = "shelf MCP（導入環境のみ）"
+
+[[substitution]]
+pattern = '~/\.claude/agents/[\w\-./]*'
+codex = "劣化ガイダンス（本ファイル該当節）"
+gemini = "劣化ガイダンス（本ファイル該当節）"
+
+[[substitution]]
+pattern = 'Agent ツール'
+codex = "逐次プロンプト"
+gemini = "逐次プロンプト"
+
+# エージェント定義(agents/*.md)のmodelフロントマター値(opus/sonnet/haiku)を
+# Codex/Gemini向けの抽象tier表現に変換するための完全一致パターン。
+# フィールド全体(文字列全体)にのみ適用するため`^...$`で完全一致に絞る
+# （body本文中に偶然"opus"等の単語が出現しても誤爆しないようにするため）。
+[[substitution]]
+pattern = '^opus$'
+codex = "最高性能クラス（Claude Opus 相当）"
+gemini = "最高性能クラス（Claude Opus 相当）"
+
+[[substitution]]
+pattern = '^haiku$'
+codex = "軽量クラス（Claude Haiku 相当）"
+gemini = "軽量クラス（Claude Haiku 相当）"

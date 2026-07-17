@@ -18,7 +18,6 @@ agent-forge への貢献を歓迎します。
 ```bash
 # hooks のテスト
 bash hooks/block-debug-log-residue.test.sh
-bash hooks/delegate-git-to-composer.test.sh
 
 # installer のテスト
 bash installer/install.test.sh

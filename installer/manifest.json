@@ -1,0 +1,42 @@
+{
+  "linkEntries": [
+    { "name": "agents", "repoPath": "agents", "claudePath": "agents" },
+    { "name": "hooks", "repoPath": "hooks", "claudePath": "hooks" },
+    { "name": "skills", "repoPath": "skills", "claudePath": "skills" },
+    { "name": "rules", "repoPath": "rules", "claudePath": "rules" },
+    { "name": "CLAUDE.core.md", "repoPath": "claude/CLAUDE.core.md", "claudePath": "CLAUDE.core.md" }
+  ],
+  "repos": {
+    "superpowers": {
+      "url": "https://github.com/obra/superpowers.git",
+      "dir": "${CLAUDE_DIR}/plugins/superpowers",
+      "lockFile": "${REPO_ROOT}/installer/superpowers.lock"
+    }
+  },
+  "prereqs": {
+    "required": ["git", "jq", "claude"],
+    "optional": ["gh", "uv", "node", "codex", "gemini"],
+    "installHints": {
+      "darwin": {
+        "git": "brew install git",
+        "jq": "brew install jq",
+        "claude": "https://docs.claude.com/ja/docs/claude-code の手順でインストール",
+        "gh": "brew install gh",
+        "uv": "brew install uv",
+        "node": "brew install node",
+        "codex": "npm install -g @openai/codex",
+        "gemini": "npm install -g @google/gemini-cli"
+      },
+      "windows": {
+        "git": "winget install Git.Git",
+        "jq": "winget install jqlang.jq",
+        "claude": "https://docs.claude.com/ja/docs/claude-code の手順でインストール",
+        "gh": "winget install GitHub.cli",
+        "uv": "winget install astral-sh.uv",
+        "node": "winget install OpenJS.NodeJS.LTS",
+        "codex": "npm install -g @openai/codex",
+        "gemini": "npm install -g @google/gemini-cli"
+      }
+    }
+  }
+}
