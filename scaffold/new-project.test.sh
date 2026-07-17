@@ -24,6 +24,20 @@ WORKDIR="$(mktemp -d)"
 WORKDIR="$(cd "${WORKDIR}" && pwd -P)"
 trap 'rm -rf "${WORKDIR}"' EXIT
 
+# --- git identityのハーミティック化 ------------------------------------------
+# なぜ明示exportするのか:
+# new-project.sh の初期コミットは「git user.name/user.emailが未設定なら警告して
+# スキップする」設計（意図した挙動）。開発機ではOS側のGECOS/hostname由来の
+# fallback identityにより暗黙にcommitが成功するが、CIランナー（GECOSが空の
+# 実行ユーザー）ではこのfallbackが効かずcommitが失敗し、「初回実行後の
+# コミット数が1」「working tree clean」を検証するテストが環境依存でFAILして
+# いた。GIT_AUTHOR_*/GIT_COMMITTER_* を明示exportすればGECOS fallbackの有無に
+# 関わらずgit commitが決定的に成立する。
+export GIT_AUTHOR_NAME="agent-forge test"
+export GIT_AUTHOR_EMAIL="agent-forge-test@example.com"
+export GIT_COMMITTER_NAME="agent-forge test"
+export GIT_COMMITTER_EMAIL="agent-forge-test@example.com"
+
 assert_rc() {
   local label="$1" expected="$2" actual="$3"
   if [ "${actual}" = "${expected}" ]; then
