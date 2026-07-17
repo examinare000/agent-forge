@@ -159,6 +159,8 @@ Claude Code以外のホストは `generators/build.py` が `rules/`・`skills/` 
 - **agent-recall**（`../agent-recall`）— セッションの教訓・振り返りを蓄積し自己改善サイクルに繋げるプラグイン（URL: `https://github.com/examinare000/agent-recall`）
 - **agent-shelf**（`../agent-shelf`）— 書籍・ドキュメントのコーパスに対するcited Q&A形式のRAG知識書庫MCP（URL: `https://github.com/examinare000/agent-shelf`）
 
+**独立導入性**：agent-forge / agent-shelf / agent-recall は互いに独立して導入可能です。任意の組み合わせで動作し、併用時のみ連携機能（shelf=外部知識の証拠源、recall=rule 94 の検索・蒸留基盤）が有効になります。
+
 ## Third-party notices
 
 - **skills/frontend-design/** — MIT License (see `skills/frontend-design/LICENSE.txt`)
