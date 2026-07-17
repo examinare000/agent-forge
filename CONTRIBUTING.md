@@ -26,6 +26,10 @@ bash installer/install.test.sh
 bash evals/harness-selftest.sh
 ```
 
+## ブランチ運用
+
+- `main` への直接 push は不可です。PR 経由でのマージが必須で、CI green が条件です。
+
 ## 質問・議論
 
 質問や設計上の議論は Issue で遠慮なく開始してください。背景や制約を共有することで、より良い提案につながります。
