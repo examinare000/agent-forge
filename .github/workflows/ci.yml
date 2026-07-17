@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # 各 .test.sh / selftest.sh は git user 設定を内部で都度 `git -C <tmp> config`
+      # しており、uv 等の外部ランタイムにも依存しない（generators/build.py は
+      # Python3標準ライブラリのみ）ため、追加セットアップ不要で実行できる。
+      - name: installer smoke test
+        run: bash installer/install.test.sh
+
+      - name: generators selftest
+        run: bash generators/selftest.sh
+
+      - name: scaffold new-project smoke test
+        run: bash scaffold/new-project.test.sh
+
+      - name: scaffold check-agent-assets smoke test
+        run: bash scaffold/templates/scripts/check-agent-assets.test.sh
+
+      - name: forge dispatcher smoke test
+        run: bash bin/forge.test.sh
+
+      - name: block-debug-log-residue hook test
+        run: bash hooks/block-debug-log-residue.test.sh
+
+      - name: evals harness selftest
+        run: bash evals/harness-selftest.sh
+
+      # dist/ は generators/build.py の生成物。rules/ や skills/ を編集して
+      # dist/ の再生成を忘れるドリフトを検知する（生成物改ざん検知）。
+      - name: verify dist/ is up to date
+        run: |
+          python3 generators/build.py
+          git diff --exit-code dist/
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
