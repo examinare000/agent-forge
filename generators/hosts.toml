@@ -11,19 +11,12 @@
 # pattern は Python の re.sub にそのまま渡す正規表現（TOML の literal
 # string = シングルクォートで書き、バックスラッシュはエスケープ不要）。
 # codex / gemini は置換後の文字列（両ホストで同じ文言でよい場合が多い）。
-
-[[substitution]]
-# 「フック整合」節は host:claude フェンスで生成物から除外されるため、
-# 節へのリンクは死リンク化する。全角括弧で囲まれた参照はまるごと注記に置換する。
-pattern = '（\[フック整合\]\(#[^)]*\)[^）]*）'
-codex = "（Claude ホスト固有のフック機構に関する節。本ホストには該当なし）"
-gemini = "（Claude ホスト固有のフック機構に関する節。本ホストには該当なし）"
-
-[[substitution]]
-# 括弧に囲まれていない裸のリンク（「詳細は[フック整合](#...)。」等）のフォールバック。
-pattern = '\[フック整合\]\(#[^)]*\)'
-codex = "Claude ホスト固有のフック機構に関する節（本ホストには該当なし）"
-gemini = "Claude ホスト固有のフック機構に関する節（本ホストには該当なし）"
+#
+# 注記: 「フック整合」節（旧・個人engineering規約のgit戦略ルールが host:claude フェンスで
+# 持っていた節）を死リンク化していた置換規則群は、rules 再スコープでその git 戦略ルール
+# 自体が削除されたことに伴い対象そのものが消滅したため削除した。
+# generators/testdata/fixture-basic はこれらに依存していなかったため
+# （`grep -rn フック整合 generators/testdata/` で無依存を確認済み）、維持せず削除する判断とした。
 
 [[substitution]]
 pattern = 'mcp__shelf__consult'
@@ -87,13 +80,6 @@ gemini = "GEMINI.md 内の該当節"
 pattern = '~/\.claude[\w\-./]*'
 codex = "本フレームワークの設定ディレクトリ相当"
 gemini = "本フレームワークの設定ディレクトリ相当"
-
-[[substitution]]
-# フック整合セクションへのリンク。フェンス内容（Claude 固有）のため、
-# 他ホストではセクションが存在しない。括弧書き説明に置換。
-pattern = '\[フック整合\]\(#フック整合メインとリポジトリ\)'
-codex = "(Claude ホスト固有のフック機構に関する節)"
-gemini = "(Claude ホスト固有のフック機構に関する節)"
 
 [[substitution]]
 pattern = 'Agent ツール'
