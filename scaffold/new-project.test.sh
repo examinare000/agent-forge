@@ -90,13 +90,12 @@ assert_symlink_target() {
 }
 
 # link モード用: installerが導入した体でCLAUDE_DIRにダミーfixtureを用意する。
+# .claude/rules/README.mdはモードによらず常に実体コピーされる（symlink化しない）ため、
+# CLAUDE.core.mdのみ用意すればよい。
 build_fake_claude_dir() {
   local dir="$1"
   mkdir -p "${dir}/rules"
   echo "# dummy CLAUDE.core.md" > "${dir}/CLAUDE.core.md"
-  echo "# dummy 11" > "${dir}/rules/11-testing-strategy.md"
-  echo "# dummy 15" > "${dir}/rules/15-frontend-design.md"
-  echo "# dummy 70" > "${dir}/rules/70-docker-environments.md"
 }
 
 # $1: dest, 残りをnew-project.shへ単語分割で渡す。CLAUDE_DIRは常に一時ディレクトリに固定する
@@ -119,9 +118,7 @@ assert_rc "copyモード生成: exit 0" 0 "${rc}"
 assert_exists "AGENTS.mdがコピーされる" "${DEST1}/AGENTS.md"
 assert_exists "GEMINI.mdがコピーされる" "${DEST1}/GEMINI.md"
 assert_exists "CLAUDE.mdが生成される" "${DEST1}/CLAUDE.md"
-assert_exists ".claude/rules/testing.mdが生成される" "${DEST1}/.claude/rules/testing.md"
-assert_exists ".claude/rules/frontend.mdが生成される" "${DEST1}/.claude/rules/frontend.md"
-assert_exists ".claude/rules/docker.mdが生成される" "${DEST1}/.claude/rules/docker.md"
+assert_exists ".claude/rules/README.mdが生成される" "${DEST1}/.claude/rules/README.md"
 assert_exists ".mcp.jsonが生成される" "${DEST1}/.mcp.json"
 assert_exists ".claude/settings.local.jsonが生成される" "${DEST1}/.claude/settings.local.json"
 assert_exists "scripts/check-agent-assets.shがコピーされる" "${DEST1}/scripts/check-agent-assets.sh"
@@ -245,9 +242,14 @@ out="$(run_new_project "${DEST4}" "${FAKE_CLAUDE_DIR}" --mode link)"
 rc=$?
 assert_rc "linkモード導入済み時: exit 0" 0 "${rc}"
 assert_symlink_target "CLAUDE.mdはCLAUDE_DIR/CLAUDE.core.mdへのsymlink" "${DEST4}/CLAUDE.md" "${FAKE_CLAUDE_DIR}/CLAUDE.core.md"
-assert_symlink_target "testing.mdはCLAUDE_DIR/rules/11-testing-strategy.mdへのsymlink" "${DEST4}/.claude/rules/testing.md" "${FAKE_CLAUDE_DIR}/rules/11-testing-strategy.md"
-assert_symlink_target "frontend.mdはCLAUDE_DIR/rules/15-frontend-design.mdへのsymlink" "${DEST4}/.claude/rules/frontend.md" "${FAKE_CLAUDE_DIR}/rules/15-frontend-design.md"
-assert_symlink_target "docker.mdはCLAUDE_DIR/rules/70-docker-environments.mdへのsymlink" "${DEST4}/.claude/rules/docker.md" "${FAKE_CLAUDE_DIR}/rules/70-docker-environments.md"
+assert_exists ".claude/rules/README.mdはlinkモードでも生成される" "${DEST4}/.claude/rules/README.md"
+if [ -L "${DEST4}/.claude/rules/README.md" ]; then
+  echo "FAIL: .claude/rules/README.mdはlinkモードでもsymlinkであってはならない(常に実体コピー)"
+  fail=$((fail + 1))
+else
+  echo "PASS: .claude/rules/README.mdはlinkモードでも実体ファイル"
+  pass=$((pass + 1))
+fi
 assert_exists "linkモードでもAGENTS.mdは実体コピー" "${DEST4}/AGENTS.md"
 if [ -L "${DEST4}/AGENTS.md" ]; then
   echo "FAIL: AGENTS.mdはlinkモードでもsymlinkであってはならない(installerがAGENTS.mdを~/.claudeへ張らないため)"

@@ -39,16 +39,15 @@ assert_contains() {
 }
 
 # $1: ケース名。stdout: 作成したプロジェクトルートの絶対パス。
-# .claude/rules/{testing,frontend,docker}.md は健全な既定状態(paths:frontmatter付き非空ファイル)で作る。
+# .claude/rules/README.md は健全な既定状態(非空ファイル)で作る
+# （forge new が常にコピーする「自分の規約をここに置く」導線ファイル）。
 build_project() {
   local name="$1"
   local proj="${WORKDIR}/${name}"
   mkdir -p "${proj}/scripts" "${proj}/.claude/rules"
   cp "${CHECK_SH}" "${proj}/scripts/check-agent-assets.sh"
   chmod +x "${proj}/scripts/check-agent-assets.sh"
-  for rule in testing frontend docker; do
-    printf -- '---\npaths:\n  - "**/*"\n---\n\n参照ファイル\n' > "${proj}/.claude/rules/${rule}.md"
-  done
+  printf '%s\n' "# .claude/rules/README.md" > "${proj}/.claude/rules/README.md"
   printf '%s' "${proj}"
 }
 
@@ -120,35 +119,25 @@ assert_rc "name不一致でexit 1" 1 "${rc}"
 assert_contains "name不一致の指摘メッセージが出る" "${out}" "name 不一致"
 
 echo ""
-echo "=== ⑥: .claude/rules/の参照ファイルが欠落していればexit 1 ==="
-proj="$(build_project "rules-missing")"
-rm -f "${proj}/.claude/rules/testing.md"
+echo "=== ⑥: .claude/rules/README.mdが欠落していればexit 1 ==="
+proj="$(build_project "readme-missing")"
+rm -f "${proj}/.claude/rules/README.md"
 out="$(run_check "${proj}")"
 rc=$?
-assert_rc "ルール参照欠落でexit 1" 1 "${rc}"
-assert_contains "欠落の指摘メッセージが出る" "${out}" "ルール参照ファイル欠落"
+assert_rc "README.md欠落でexit 1" 1 "${rc}"
+assert_contains "欠落の指摘メッセージが出る" "${out}" ".claude/rules/README.md が存在しません"
 
 echo ""
-echo "=== ⑦: .claude/rules/の参照ファイルがpaths:frontmatterを持たなければexit 1 ==="
-proj="$(build_project "rules-no-paths")"
-printf 'paths無しの本文だけのファイル\n' > "${proj}/.claude/rules/docker.md"
+echo "=== ⑦: .claude/rules/README.mdが空ならexit 1 ==="
+proj="$(build_project "readme-empty")"
+: > "${proj}/.claude/rules/README.md"
 out="$(run_check "${proj}")"
 rc=$?
-assert_rc "paths:欠落でexit 1" 1 "${rc}"
-assert_contains "paths:欠落の指摘メッセージが出る" "${out}" "paths: frontmatter"
+assert_rc "README.md空でexit 1" 1 "${rc}"
+assert_contains "空の指摘メッセージが出る" "${out}" ".claude/rules/README.md が空です"
 
 echo ""
-echo "=== ⑧: .claude/rules/が壊れたsymlinkならexit 1 ==="
-proj="$(build_project "rules-broken-symlink")"
-rm -f "${proj}/.claude/rules/frontend.md"
-ln -s "/no/such/target-15-frontend-design.md" "${proj}/.claude/rules/frontend.md"
-out="$(run_check "${proj}")"
-rc=$?
-assert_rc "壊れたsymlinkでexit 1" 1 "${rc}"
-assert_contains "symlink切断の指摘メッセージが出る" "${out}" "symlink 切断"
-
-echo ""
-echo "=== ⑨: 健全なプロジェクトはexit 0(✅) ==="
+echo "=== ⑧: 健全なプロジェクトはexit 0(✅) ==="
 proj="$(build_project "healthy")"
 out="$(run_check "${proj}")"
 rc=$?
