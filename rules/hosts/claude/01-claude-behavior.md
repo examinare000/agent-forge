@@ -1,5 +1,5 @@
 # 01. Claude Code動作制約
-共通:`03-agent-behavior.md`、Git:`10-git-strategy.md`
+共通:`03-agent-behavior.md`
 
 ## 動作モード
 - **サブエージェント品質ゲート**: 専門レビュー必要時 ➔ `91-claude-subagent-coding.md`

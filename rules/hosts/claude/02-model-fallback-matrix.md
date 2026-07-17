@@ -19,7 +19,7 @@ installer が `~/.claude/agents/` に配置する 8 エージェントの frontm
 |---|---|---|---|
 | `testability-architect` | opus | A | 設計・境界・タスク分解 |
 | `adversarial-verifier` | opus | A | 推論成果物の反証ファースト検証 |
-| `tdd-strict-coder` | sonnet | B | TDD 実装・バグ修正 |
+| `tdd-strict-coder` | sonnet | B | 実装・バグ修正 |
 | `code-reviewer` | sonnet | B | フレッシュコンテキストのコードレビュー |
 | `ai-antipattern-reviewer` | sonnet | B | AI アンチパターン検査 |
 | `git-composer` | sonnet | B | git/gh 変更系の一元実行 |
