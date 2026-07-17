@@ -200,7 +200,10 @@ Claude Code以外のホストは `generators/build.py` が `rules/`・`skills/` 
 
 ### Third-party notices
 
-- **skills/frontend-design/** — MIT License (see `skills/frontend-design/LICENSE.txt`)
+本リポジトリは MIT License ですが、以下のディレクトリは第三者由来であり、それぞれのライセンスに従います。
+
+- **skills/frontend-design/** — Copyright Anthropic, PBC. Apache License 2.0（[anthropics/skills](https://github.com/anthropics/skills) 由来。ライセンス全文は `skills/frontend-design/LICENSE.txt`）
+- **skills/baseline-ui/** — Copyright (c) 2026 Julien Thibeaut. MIT License（[ibelick/ui-skills](https://github.com/ibelick/ui-skills) 由来。ライセンス全文は `skills/baseline-ui/LICENSE.txt`）
 - **superpowers** — 依存関係であり同梱していません。Claude Code 環境で別途構成してください。
 
 ### ライセンス
