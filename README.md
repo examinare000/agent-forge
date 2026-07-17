@@ -1,21 +1,21 @@
 # agent-forge
 
-**agent-forge** is an open-source bootstrap framework for AI-driven development. It packages rules, skills, subagents, hooks, and evals into a disciplined, orchestrator-style operating model for Claude Code, OpenAI Codex, and Gemini CLI. One installer sets up your global environment; one scaffold command spins up a new project that uses it from day one. Whether you're starting your first AI-driven build or hardening an existing one, agent-forge gets you a working baseline in minutes. Documentation below is in Japanese.
+**agent-forge** is an open-source bootstrap framework that automatically configures AI coding agents to follow a naming-convention-organized `agent-rules` set, so they autonomously handle model selection, task decomposition, delegation, and self-improvement loops. It packages rules, skills, subagents, hooks, and evals into a disciplined, orchestrator-style operating model for Claude Code, OpenAI Codex, and Gemini CLI. One installer sets up your global environment; one scaffold command spins up a new project that uses it from day one. The core intentionally excludes personal engineering preferences (git strategy, testing strategy, Docker, frontend design) — the numbered rule bands are left open for adopters to add their own conventions. Whether you're starting your first AI-driven build or hardening an existing one, agent-forge gets you a working baseline in minutes. Documentation below is in Japanese.
 
 ---
 
 ## 概要
 
-AIコーディングエージェントに規律あるオーケストレーション運用を与えるフレームワークです。これからAI駆動で開発やビジネスを始める人が、最短で「規律ある運用」から着手できることを目指しています。中身は次の「何が手に入るか」を参照してください。
+命名規則で整理された `agent-rules` により、AIコーディングエージェントがモデル選択・作業分解・タスク委譲・自己改善ループを自律的に回す設定を自動で行うフレームワークです。個人の工学的嗜好（git戦略・テスト戦略・Docker・フロントエンド設計）はコアから外し、番号体系は採用者が自分の規約を追加する受け皿として残します。これからAI駆動で開発やビジネスを始める人が、最短で「規律ある運用」から着手できることを目指しています。中身は次の「何が手に入るか」を参照してください。
 
 ## 何が手に入るか
 
 | 資産 | 役割 | 内容 |
 |---|---|---|
-| `rules/` | 規範 | エージェントが常に従うべき原則・戦略ドキュメント（コア原則からGit戦略・セキュリティ・深度推論まで） |
-| `skills/` | 手続き | 特定作業の実行手順を型化したスキル（TDD・レビュー・ブランチ完結など） |
+| `rules/` | 規範 | エージェントが常に従うべきホスト非依存の基盤原則（コア原則・モデルティア・セキュリティ・深度推論等）。`10-29`（ワークフロー）・`70-89`（言語/環境）は採用者が自分の工学規約を追加する意図的な空き番帯 |
+| `skills/` | 手続き | 特定作業の実行手順を型化したスキル（レビュー・ブランチ完結など） |
 | `agents/` | サブエージェント（8体） | アーキテクト・TDDコーダー・実装コーダー・テスト実行・コードレビュワー・gitコミット担当・反証検証者・アンチパターンレビュワーの8役に分かれたサブエージェント定義 |
-| `hooks/` | 強制ゲート（5本） | 保護ブランチへのコミット遮断・デバッグログ残留検出・git操作のコンポーザー委譲強制・コンパクト前バックアップ・編集後lintなど、規約を機械的に強制するフック |
+| `hooks/` | 強制ゲート（3本） | デバッグログ残留検出・コンパクト前バックアップ・編集後lintなど、規約を機械的に強制するフック |
 | `evals/` | 挙動回帰 | エージェント/スキルのゴールデンタスクを実際の `claude` CLI で手動実行し、決定的アサートのみで退行を検出する回帰基盤 |
 | `installer/` | ユーザー環境導入 | `~/.claude/` へ rules・skills・agents・hooks を絶対パスsymlinkで導入・検査（doctor）・アンインストールするインストーラ |
 | `scaffold/` + `bin/forge` | 新規プロジェクト生成 | `forge new` で任意ディレクトリに新規プロジェクトの雛形（CLAUDE.md・.mcp.json・AGENTS.md等）を生成する統一CLI |
@@ -36,17 +36,14 @@ v0.1.0 開発中
 agent-forge/
 ├── bin/                            # 統一CLI
 │   └── forge                      # install/new/check の薄いディスパッチャ
-├── rules/                          # 規範・戦略ドキュメント
+├── rules/                          # 規範・戦略ドキュメント（10-29・70-89は採用者が追加する意図的な空き番帯）
 │   ├── 00-core-principles.md      # コア原則
+│   ├── 02-model-fallback-matrix.md # モデルティア運用マトリクス
 │   ├── 03-agent-behavior.md       # エージェント挙動規範
-│   ├── 10-git-strategy.md         # Git戦略
-│   ├── 11-testing-strategy.md     # テスト戦略
 │   ├── 12-security-guidelines.md  # セキュリティ
 │   ├── 13-readability.md          # 可読性
-│   ├── 15-frontend-design.md      # フロントエンド設計
 │   ├── 30-documentation-management.md  # ドキュメント管理
 │   ├── 50-production-reliability.md    # 本番信頼性
-│   ├── 70-docker-environments.md       # Docker環境
 │   ├── 93-deep-reasoning-protocol.md   # 深度推論プロトコル
 │   ├── 94-self-improvement-protocol.md  # 自己改善プロトコル
 │   ├── hosts/claude/              # Claude固有の規範
@@ -71,13 +68,10 @@ agent-forge/
 │   ├── git-composer.md
 │   ├── adversarial-verifier.md
 │   └── ai-antipattern-reviewer.md
-├── hooks/                         # Gitフック・編集ゲート
+├── hooks/                         # 編集ゲート
 │   ├── backup-before-compact.sh
 │   ├── block-debug-log-residue.sh
 │   ├── block-debug-log-residue.test.sh
-│   ├── block-protected-branch-commit.sh
-│   ├── delegate-git-to-composer.sh
-│   ├── delegate-git-to-composer.test.sh
 │   └── lint-after-edit.sh
 ├── evals/                         # 回帰テスト
 │   ├── run-evals.sh
@@ -147,7 +141,7 @@ Claude Code: /finishing-a-development-branch
 
 ### `--mode link`（上級者向け・installer導入済み前提）
 
-`forge install` 済みであれば、`forge new <dir> --mode link` で `CLAUDE.md` と `.claude/rules/{testing,frontend,docker}.md` を `~/.claude/` 側の実体へ絶対パスsymlinkとして張ります。ルール更新が生成済みの全プロジェクトへ即座に波及するため、複数プロジェクトを横断管理する場合に向きます。`forge install` が未実施の環境では明示的にエラーで停止します。
+`forge install` 済みであれば、`forge new <dir> --mode link` で `CLAUDE.md` を `~/.claude/CLAUDE.core.md` へ絶対パスsymlinkとして張ります。ルール更新が生成済みの全プロジェクトへ即座に波及するため、複数プロジェクトを横断管理する場合に向きます。`.claude/rules/README.md`（自分の規約を追加する導線）はcopy/linkどちらのモードでも常に実体コピーします。`forge install` が未実施の環境では明示的にエラーで停止します。
 
 ### Codex / Gemini CLI ユーザー向け
 
