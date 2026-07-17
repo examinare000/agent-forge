@@ -1,20 +1,5 @@
 {
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/delegate-git-to-composer.sh"
-          },
-          {
-            "type": "command",
-            "command": "$HOME/.claude/hooks/block-protected-branch-commit.sh"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit",
