@@ -36,6 +36,26 @@ WORKDIR="$(mktemp -d)"
 WORKDIR="$(cd "${WORKDIR}" && pwd -P)"
 trap 'rm -rf "${WORKDIR}"' EXIT
 
+# --- 必須CLIスタブ（ハーミティック化） ---------------------------------------
+# なぜ claude をスタブするのか:
+# install.sh の prereq検査は `command -v claude` の可否のみを見る（実行はしない）。
+# claude CLI は開発機にはあるがCIランナーには存在しないため、このテストは
+# 「ローカルではgreen・CIでは大半FAIL」という環境依存（非ハーミティック）な
+# 状態になっていた。実行されない前提のCLIなので `exit 0` の空スタブで十分。
+# git/jq は install.sh が実際にサブコマンドとして使う（git clone/checkout,
+# jq -r 等）ため実物が必要 — スタブせず、CIランナーにプリインストール済みの
+# ものをそのまま使う。
+# ⑥番シナリオ（必須CLI不足時にfailすることの検証）だけは意図的にこの
+# STUB_BINを含まないPATHへ絞り込んでいるため影響を受けない。
+STUB_BIN="${WORKDIR}/stub-bin"
+mkdir -p "${STUB_BIN}"
+cat > "${STUB_BIN}/claude" <<'EOF'
+#!/bin/sh
+exit 0
+EOF
+chmod +x "${STUB_BIN}/claude"
+PATH="${STUB_BIN}:${PATH}"
+
 # $1: label, $2: expected exit code, $3: actual exit code
 assert_rc() {
   local label="$1" expected="$2" actual="$3"
