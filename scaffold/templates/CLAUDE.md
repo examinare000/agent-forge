@@ -1,7 +1,7 @@
 # CLAUDE.md — {{PROJECT_NAME}}
 
 このファイルはプロジェクトへの薄い入口です。エージェント挙動の正本は
-[agent-forge](<agent-forgeリポジトリのURL>) が `~/.claude/` 配下にグローバル導入する
+[agent-forge](https://github.com/examinare000/agent-forge) が `~/.claude/` 配下にグローバル導入する
 ルール・スキル・サブエージェント定義であり、ここでは重複させません。
 
 ## ルーティング

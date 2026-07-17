@@ -100,7 +100,7 @@ agent-forge/
 
 ```bash
 # 1. clone
-git clone <このリポジトリのURL> ~/git/agent-forge
+git clone https://github.com/examinare000/agent-forge.git ~/git/agent-forge
 cd ~/git/agent-forge
 
 # 2. ~/.claude へ rules/skills/agents/hooks を導入（グローバル・絶対パスsymlink）
@@ -156,26 +156,8 @@ Claude Code以外のホストは `generators/build.py` が `rules/`・`skills/` 
 
 ### コンパニオンプロジェクト
 
-- **agent-recall**（`../agent-recall`）— セッションの教訓・振り返りを蓄積し自己改善サイクルに繋げるプラグイン（URL: `<agent-recallリポジトリのURL>`）
-- **agent-shelf**（`../agent-shelf`）— 書籍・ドキュメントのコーパスに対するcited Q&A形式のRAG知識書庫MCP（URL: `<agent-shelfリポジトリのURL>`）
-
-## agentDevTemplate 利用者向け移行ガイド
-
-agent-forgeは個人テンプレート `agentDevTemplate` の汎用部分（rules/skills/agents/プロジェクト生成機構）をOSSとして切り出し・一般化した後継です。`agentDevTemplate` は takt 統合・プロジェクト固有の実験場として引き続き手元に残りますが、汎用的なエージェント規範・手続きの正本は今後agent-forge側で更新されます。
-
-### 既存プロジェクトの正本切り替え
-
-`agentDevTemplate` の `create_new_project.sh` で作成した既存プロジェクトは、`agent-rules/` がテンプレ側実体へのsymlinkになっています。agent-forge導入後（`forge install` 実施後）は、以下のコマンドで参照先を agent-forge 側へ切り替えられます。
-
-```bash
-cd <既存プロジェクトのディレクトリ>
-AGENT_RULES_SRC=~/.claude/rules bash scripts/setup-agent-rules.sh
-```
-
-### 注意
-
-- agent-forgeの `rules/` はagentDevTemplateの `agent-rules/` から改番・脱個人化されています。ファイル対応が1:1ではないため、切り替え時はプロジェクトごとに `diff` でレビューすることを推奨します。
-- `takt` 統合（`.takt/`・90番台ルール）はagent-forgeの対象外です。将来的にoptionalな統合を検討する可能性はありますが、現時点では未対応です。
+- **agent-recall**（`../agent-recall`）— セッションの教訓・振り返りを蓄積し自己改善サイクルに繋げるプラグイン（URL: `https://github.com/examinare000/agent-recall`）
+- **agent-shelf**（`../agent-shelf`）— 書籍・ドキュメントのコーパスに対するcited Q&A形式のRAG知識書庫MCP（URL: `https://github.com/examinare000/agent-shelf`）
 
 ## Third-party notices
 
