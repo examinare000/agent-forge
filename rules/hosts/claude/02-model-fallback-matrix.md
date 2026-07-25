@@ -28,8 +28,11 @@ installer が `~/.claude/agents/` に配置する 8 エージェントの frontm
 
 ## 降格手順（最終手段。opus が完全不在の時のみ）
 
-正本の「格下げの順序」（実装役 ➔ メイン ➔ 検証役）に従う。検証役のピン降格は opus が
-サブエージェント用途でも呼び出せなくなった場合の最終手段:
+正本の「格下げの順序」（実装役 ➔ メイン ➔ 検証役）に従う。opus がサブエージェント用途でも
+呼び出せなくなった場合、まず**クロスベンダー最上位ティアを read-only の代替検証役として用いて
+Tier A ピンを維持する**（正本: `../../02-model-fallback-matrix.md`「格下げの順序」。起動規律は
+`../../03-agent-behavior.md`「委譲と検証の原則」— タスク文で read-only / propose-only を明示する）。
+検証役のピン降格（下記 sed）は、その手段も使えない場合の最終手段:
 
 ```bash
 # 対象: ~/.claude/agents/ の frontmatter model 行のみ（sed -i '' は BSD/macOS 構文。Linux では sed -i）
