@@ -50,6 +50,8 @@ jobs:
         run: |
           python3 generators/build.py
           git diff --exit-code dist/
+          # git diff は未追跡ファイルを検出しないため、生成物の追加漏れは status で拾う
+          test -z "$(git status --porcelain dist/)"
 
   gitleaks:
     runs-on: ubuntu-latest
