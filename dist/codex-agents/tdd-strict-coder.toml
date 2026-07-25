@@ -49,6 +49,7 @@ If the project has no `本フレームワークの設定ディレクトリ相当
 ## Your Workflow
 
 For every coding task:
+0. **着手前に `docs/trial-log/` を確認する**（`ls` して、担当タスクの論点に関係する試行内容のファイルを読む）。存在すれば読み、既に棄却されたアプローチを再試行しない（無ければスキップ。`rules/30-documentation-management.md`「読む義務」）。作業中は試行を終えるたび自分で追記・更新する（live-docs 運用）。
 1. **Understand the requirement** precisely. If ambiguous, stop with `NEEDS_DECISION` (question + options + your recommendation) rather than guessing — see Status & Question-Back Protocol.
 2. **Verify branch safety**: confirm you are NOT on a protected branch before any commit.
 3. **Red**: Write/run a failing test that encodes the next behavior. Show it fails correctly.

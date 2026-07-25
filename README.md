@@ -117,7 +117,8 @@ agent-forge/
 │   ├── frontend-design/
 │   ├── deep-reasoning/
 │   ├── plan-deep-research/
-│   └── review-ai-antipattern/
+│   ├── review-ai-antipattern/
+│   └── trial-log/
 ├── agents/                        # サブエージェント定義
 │   ├── testability-architect.md
 │   ├── tdd-strict-coder.md
