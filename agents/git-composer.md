@@ -4,6 +4,7 @@ description: "Use for any git operation (staging, committing, branching, merging
 model: sonnet
 color: green
 memory: user
+effort: medium
 tools: Bash, Read, Grep, Glob, Edit, Write
 ---
 

@@ -4,6 +4,7 @@ description: "Use this agent to run tests, linters, type checks, or builds and r
 model: haiku
 color: cyan
 memory: user
+effort: low
 tools: Bash, Read, Grep, Glob
 ---
 
