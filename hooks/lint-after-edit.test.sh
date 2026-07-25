@@ -19,6 +19,9 @@ HOOK="$SCRIPT_DIR/lint-after-edit.sh"
 
 TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
+export TMP_ROOT
+OUT="$TMP_ROOT/out"
+ERR="$TMP_ROOT/err"
 
 pass=0
 fail=0
@@ -31,22 +34,21 @@ assert_exit() {
   local run_path="$PATH"
   [ -n "$path_prefix" ] && run_path="$path_prefix:$PATH"
   PATH="$run_path" bash "$HOOK" <<<"$json" \
-    >/tmp/lint-after-edit-test-stdout.$$ 2>/tmp/lint-after-edit-test-stderr.$$
+    >"$OUT" 2>"$ERR"
   actual=$?
   [ "$actual" = "$expected" ] || ok=0
   if [ -n "$must_contain" ]; then
-    grep -qF "$must_contain" /tmp/lint-after-edit-test-stderr.$$ || ok=0
+    grep -qF "$must_contain" "$ERR" || ok=0
   fi
   if [ "$ok" = 1 ]; then
     echo "PASS: $label (exit=$actual)"
     pass=$((pass + 1))
   else
     echo "FAIL: $label (expected exit=$expected actual=$actual, must_contain=[$must_contain])"
-    echo "  stdout: $(cat /tmp/lint-after-edit-test-stdout.$$)"
-    echo "  stderr: $(cat /tmp/lint-after-edit-test-stderr.$$)"
+    echo "  stdout: $(cat "$OUT")"
+    echo "  stderr: $(cat "$ERR")"
     fail=$((fail + 1))
   fi
-  rm -f /tmp/lint-after-edit-test-stdout.$$ /tmp/lint-after-edit-test-stderr.$$
 }
 
 json_escape() {
@@ -113,7 +115,8 @@ mkdir -p "$ESLINT_PROJ/node_modules/.bin" "$ESLINT_PROJ/src"
 cat > "$ESLINT_PROJ/node_modules/.bin/eslint" <<'EOF'
 #!/usr/bin/env bash
 # eslint <file> の呼び出しを模した検出ありスタブ。
-echo "$1"
+printf '%s\n' "$*" > "$TMP_ROOT/eslint-args"
+echo "${!#}"
 echo "  1:1  error  'unused' is defined but never used  no-unused-vars"
 exit 1
 EOF
@@ -125,6 +128,91 @@ assert_exit "eslint スタブが検出(exit1, node_modules/.bin 経由) -> フ�
   2 "$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$ts_file")")" \
   "" \
   "no-unused-vars"
+
+RUFF_CRASH_DIR="$(mktemp -d "$TMP_ROOT/ruffcrash.XXXXXX")"
+cat > "$RUFF_CRASH_DIR/ruff" <<'EOF'
+#!/usr/bin/env bash
+echo "Traceback: ruff crashed"
+exit 2
+EOF
+chmod +x "$RUFF_CRASH_DIR/ruff"
+
+assert_exit "ruff がクラッシュ(exit2) -> fail-openで exit 0" \
+  0 "$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$py_file")")" \
+  "$RUFF_CRASH_DIR"
+if [ ! -s "$ERR" ]; then
+  echo "PASS: ruff クラッシュ時は stderr が空"
+  pass=$((pass + 1))
+else
+  echo "FAIL: ruff クラッシュ時に stderr が出力された: $(cat "$ERR")"
+  fail=$((fail + 1))
+fi
+
+# --cache 書込不能（read-only な node_modules 等）で eslint が exit 2 を返す
+# ケース。--cache なしで再実行すると本来の lint 指摘（exit 1）が拾えるため、
+# フックはその再実行結果を採用して指摘を返さなければならない。
+ESLINT_CACHE_FAIL_PROJ="$(mktemp -d "$TMP_ROOT/eslintcachefail.XXXXXX")"
+mkdir -p "$ESLINT_CACHE_FAIL_PROJ/node_modules/.bin" "$ESLINT_CACHE_FAIL_PROJ/src"
+cat > "$ESLINT_CACHE_FAIL_PROJ/node_modules/.bin/eslint" <<'EOF'
+#!/usr/bin/env bash
+# --cache 付き呼び出しはキャッシュ書込不能を模して exit 2（クラッシュ扱い）。
+# --cache なし呼び出しは本来の lint 指摘を返す（exit 1）。
+if printf '%s\n' "$*" | grep -q -- '--cache'; then
+  echo "cache write failed: EACCES" >&2
+  exit 2
+fi
+echo "${!#}"
+echo "  1:1  error  'unused' is defined but never used  no-unused-vars"
+exit 1
+EOF
+chmod +x "$ESLINT_CACHE_FAIL_PROJ/node_modules/.bin/eslint"
+cache_fail_file="$ESLINT_CACHE_FAIL_PROJ/src/component.ts"
+printf 'const unused = 1;\n' > "$cache_fail_file"
+assert_exit "eslint が --cache 書込不能で exit2 -> --cacheなし再実行の指摘(exit1)を採用してフックはexit 2" \
+  2 "$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$cache_fail_file")")" \
+  "" \
+  "no-unused-vars"
+
+ESLINT_CRASH_PROJ="$(mktemp -d "$TMP_ROOT/eslintcrash.XXXXXX")"
+mkdir -p "$ESLINT_CRASH_PROJ/node_modules/.bin" "$ESLINT_CRASH_PROJ/src"
+cat > "$ESLINT_CRASH_PROJ/node_modules/.bin/eslint" <<'EOF'
+#!/usr/bin/env bash
+echo "eslint executable failed"
+exit 127
+EOF
+chmod +x "$ESLINT_CRASH_PROJ/node_modules/.bin/eslint"
+eslint_crash_file="$ESLINT_CRASH_PROJ/src/component.ts"
+printf 'const value = 1;\n' > "$eslint_crash_file"
+assert_exit "eslint が実行不能相当(exit127) -> fail-openで exit 0" \
+  0 "$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$eslint_crash_file")")"
+
+if grep -q -- '--cache' "$TMP_ROOT/eslint-args"; then
+  echo "PASS: eslint 呼び出しに --cache を含む"
+  pass=$((pass + 1))
+else
+  echo "FAIL: eslint 呼び出しに --cache が無い: $(cat "$TMP_ROOT/eslint-args")"
+  fail=$((fail + 1))
+fi
+
+# jq を隠しても python3 フォールバックで file_path を抽出し lint できる。
+PYTHON_ONLY_BIN="$(mktemp -d "$TMP_ROOT/pythononly.XXXXXX")"
+for tool in bash cat dirname env python3; do
+  real="$(command -v "$tool" 2>/dev/null || true)"
+  [ -n "$real" ] && ln -s "$real" "$PYTHON_ONLY_BIN/$tool"
+done
+ln -s "$RUFF_STUB_DIR/ruff" "$PYTHON_ONLY_BIN/ruff"
+REAL_BASH="$(command -v bash)"
+PATH="$PYTHON_ONLY_BIN" "$REAL_BASH" "$HOOK" \
+  <<<"$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$py_file")")" \
+  >"$OUT" 2>"$ERR"
+python_fallback_rc=$?
+if [ "$python_fallback_rc" = "2" ] && grep -qF "F401" "$ERR"; then
+  echo "PASS: jq 不在でも python3 フォールバックで lint する"
+  pass=$((pass + 1))
+else
+  echo "FAIL: python3 フォールバック lint (expected=2 actual=$python_fallback_rc stderr=$(cat "$ERR"))"
+  fail=$((fail + 1))
+fi
 
 echo "----"
 echo "pass=$pass fail=$fail"
