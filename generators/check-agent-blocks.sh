@@ -13,7 +13,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
-cd "$REPO_ROOT"
+cd "$REPO_ROOT" || exit 1
 
 python3 - <<'PY'
 import sys
