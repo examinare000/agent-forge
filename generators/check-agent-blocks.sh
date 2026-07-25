@@ -67,12 +67,20 @@ pair_count = 0
 for block_name, targets in MAPPING.items():
     block_path = BLOCKS_DIR / block_name
     block_text = block_path.read_text(encoding="utf-8").rstrip("\n")
+    # 空（または空白のみ）の正準ファイルは、空文字列が全対象の部分文字列になるため
+    # 埋め込み検査が常に通ってしまい空洞化する。先に弾く。
+    if not block_text.strip():
+        print(f"{block_name}: 正準ファイルが空", file=sys.stderr)
+        sys.exit(1)
     for target in targets:
         pair_count += 1
         target_path = Path(target)
         target_text = target_path.read_text(encoding="utf-8")
-        if block_text not in target_text:
+        occurrences = target_text.count(block_text)
+        if occurrences == 0:
             failures.append(f"{block_name}: {target}")
+        elif occurrences > 1:
+            failures.append(f"{block_name}: {target} (重複 {occurrences} 回)")
 
 if failures:
     for line in failures:

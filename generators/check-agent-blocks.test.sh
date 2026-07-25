@@ -196,6 +196,46 @@ fi
 rm -f "$stderr_tmp"
 
 # ============================================================
+# テスト6: 正準ファイルが空だと exit 1
+# ============================================================
+TEST_REPO_6="$TMP_ROOT/test-repo-6"
+mkdir -p "$TEST_REPO_6"
+cp -R "$REPO_ROOT/agents" "$TEST_REPO_6/"
+cp -R "$REPO_ROOT/skills" "$TEST_REPO_6/"
+cp -R "$REPO_ROOT/generators" "$TEST_REPO_6/"
+
+# report-core.md を空にする（空洞化: rstrip 後に空文字列だと全対象の部分文字列となり検知できない問題への回帰テスト）
+: > "$TEST_REPO_6/generators/agent-blocks/report-core.md"
+
+assert_result "正準ファイルが空だと exit 1" \
+  1 "$TEST_REPO_6" \
+  "" \
+  "report-core.md: 正準ファイルが空"
+
+# ============================================================
+# テスト7: 対象内にブロックが重複していると exit 1
+# ============================================================
+TEST_REPO_7="$TMP_ROOT/test-repo-7"
+mkdir -p "$TEST_REPO_7"
+cp -R "$REPO_ROOT/agents" "$TEST_REPO_7/"
+cp -R "$REPO_ROOT/skills" "$TEST_REPO_7/"
+cp -R "$REPO_ROOT/generators" "$TEST_REPO_7/"
+
+# agents/test-runner.md に no-nesting ブロックをもう1箇所複製する（古い重複が残るケース）
+python3 - "$TEST_REPO_7/generators/agent-blocks/no-nesting.md" "$TEST_REPO_7/agents/test-runner.md" <<'PY'
+import sys
+block_path, target_path = sys.argv[1], sys.argv[2]
+block_text = open(block_path, encoding="utf-8").read().rstrip("\n")
+with open(target_path, "a", encoding="utf-8") as f:
+    f.write("\n\n" + block_text + "\n")
+PY
+
+assert_result "対象内にブロックが重複していると exit 1" \
+  1 "$TEST_REPO_7" \
+  "" \
+  "重複"
+
+# ============================================================
 # 結果集計
 # ============================================================
 echo "----"
