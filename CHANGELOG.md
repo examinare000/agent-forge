@@ -6,6 +6,8 @@
 
 ## [未リリース]
 
+## [0.4.0] - 2026-07-25
+
 ### Added
 - **trial-log スキル同梱**: 開発中の試行記録（docs/trial-log/）を live-docs として運用する手続きスキルを新規追加。ワーカーが試行を1つ終えるたび自発的に記録し、同じ失敗の繰り返し・棄却済み案の再試行を防ぐメカニズムを実装
 - trial-log 記録義務を 4 エージェント（`implementation-coder` / `tdd-strict-coder` / `code-reviewer` / `testability-architect`）に配線
