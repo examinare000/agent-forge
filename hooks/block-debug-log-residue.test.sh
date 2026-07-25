@@ -16,6 +16,8 @@ HOOK="$SCRIPT_DIR/block-debug-log-residue.sh"
 
 TMP_ROOT="$(mktemp -d)"
 trap 'rm -rf "$TMP_ROOT"' EXIT
+OUT="$TMP_ROOT/out"
+ERR="$TMP_ROOT/err"
 
 pass=0
 fail=0
@@ -63,10 +65,10 @@ assert_exit() {
   local actual
   if [ -n "$dir" ]; then
     (cd "$dir" && bash "$HOOK" <<<"$json") \
-      >/tmp/debug-log-residue-test-stdout.$$ 2>/tmp/debug-log-residue-test-stderr.$$
+      >"$OUT" 2>"$ERR"
   else
     bash "$HOOK" <<<"$json" \
-      >/tmp/debug-log-residue-test-stdout.$$ 2>/tmp/debug-log-residue-test-stderr.$$
+      >"$OUT" 2>"$ERR"
   fi
   actual=$?
   if [ "$actual" = "$expected" ]; then
@@ -74,11 +76,10 @@ assert_exit() {
     pass=$((pass + 1))
   else
     echo "FAIL: $label (expected=$expected actual=$actual)"
-    echo "  stdout: $(cat /tmp/debug-log-residue-test-stdout.$$)"
-    echo "  stderr: $(cat /tmp/debug-log-residue-test-stderr.$$)"
+    echo "  stdout: $(cat "$OUT")"
+    echo "  stderr: $(cat "$ERR")"
     fail=$((fail + 1))
   fi
-  rm -f /tmp/debug-log-residue-test-stdout.$$ /tmp/debug-log-residue-test-stderr.$$
 }
 
 # $1: label, $2: expected exit code, $3: stderr に含まれるべき文字列, $4: json stdin
@@ -86,17 +87,16 @@ assert_stderr_contains() {
   local label="$1" expected="$2" needle="$3" json="$4"
   local actual
   bash "$HOOK" <<<"$json" \
-    >/tmp/debug-log-residue-test-stdout.$$ 2>/tmp/debug-log-residue-test-stderr.$$
+    >"$OUT" 2>"$ERR"
   actual=$?
-  if [ "$actual" = "$expected" ] && grep -qF "$needle" /tmp/debug-log-residue-test-stderr.$$; then
+  if [ "$actual" = "$expected" ] && grep -qF "$needle" "$ERR"; then
     echo "PASS: $label"
     pass=$((pass + 1))
   else
     echo "FAIL: $label (expected_exit=$expected actual=$actual needle=$needle)"
-    echo "  stderr: $(cat /tmp/debug-log-residue-test-stderr.$$)"
+    echo "  stderr: $(cat "$ERR")"
     fail=$((fail + 1))
   fi
-  rm -f /tmp/debug-log-residue-test-stdout.$$ /tmp/debug-log-residue-test-stderr.$$
 }
 
 # =========================================================================
@@ -133,13 +133,14 @@ assert_exit "4. クリーンなrepoは許可" \
   0 '{"cwd":"'"$repo4"'"}'
 
 # =========================================================================
-# 5. 未stageの追加行 [DEBUG] -> ブロック
+# 5. サブディレクトリをcwdにしても、兄弟側の未stage追加行 [DEBUG] -> ブロック
 # =========================================================================
 repo5="$(make_repo)"
-commit_file "$repo5" foo.sh $'line1\n'
-write_file "$repo5" foo.sh $'line1\n[DEBUG] leftover\n'
-assert_exit "5. 未stageの追加行 [DEBUG] をブロック" \
-  2 '{"cwd":"'"$repo5"'"}'
+commit_file "$repo5" sibling/foo.sh $'line1\n'
+mkdir -p "$repo5/work/current"
+write_file "$repo5" sibling/foo.sh $'line1\n[DEBUG] leftover\n'
+assert_exit "5. nested cwdから兄弟側の未stage追加行 [DEBUG] もブロック" \
+  2 '{"cwd":"'"$repo5/work/current"'"}'
 
 # =========================================================================
 # 6. stage済みのみの追加行 [TRACE] -> ブロック
@@ -223,7 +224,7 @@ assert_exit "14. JSONにcwd無し時は\$PWDにフォールバックしてブロ
 
 # =========================================================================
 # 15. 壊れたstdin（非repo cwd）-> 許可（fail-open）
-# 空stdin '' も同じ get_field パース失敗経路（jq/python3ともに空文字列を返す）
+# 空stdin '' も同じ json_field パース失敗経路（jq/python3ともに空文字列を返す）
 # を通るため、壊れたJSON1本の検証で経路としては等価に確認できる。
 # =========================================================================
 assert_exit "15. 壊れたJSONは非repo cwdで許可（パース失敗時のfail-open）" \
@@ -262,20 +263,19 @@ write_file "$repo18" block-debug-log-residue.sh $'orig\n[DEBUG] self should be e
 
 label18="18. 複数ファイル違反を全件列挙しつつフック自身は自己除外"
 bash "$HOOK" <<<'{"cwd":"'"$repo18"'"}' \
-  >/tmp/debug-log-residue-test-stdout.$$ 2>/tmp/debug-log-residue-test-stderr.$$
+  >"$OUT" 2>"$ERR"
 actual18=$?
 if [ "$actual18" = "2" ] \
-  && grep -qF "fileA.sh" /tmp/debug-log-residue-test-stderr.$$ \
-  && grep -qF "fileB.sh" /tmp/debug-log-residue-test-stderr.$$ \
-  && ! grep -q "block-debug-log-residue.sh:" /tmp/debug-log-residue-test-stderr.$$; then
+  && grep -qF "fileA.sh" "$ERR" \
+  && grep -qF "fileB.sh" "$ERR" \
+  && ! grep -q "block-debug-log-residue.sh:" "$ERR"; then
   echo "PASS: $label18"
   pass=$((pass + 1))
 else
   echo "FAIL: $label18 (actual=$actual18)"
-  echo "  stderr: $(cat /tmp/debug-log-residue-test-stderr.$$)"
+  echo "  stderr: $(cat "$ERR")"
   fail=$((fail + 1))
 fi
-rm -f /tmp/debug-log-residue-test-stdout.$$ /tmp/debug-log-residue-test-stderr.$$
 
 # =========================================================================
 # 19. スペースを含む .md パス: git は "+++ b/path" 行のパスがスペースを含む場合
@@ -291,7 +291,7 @@ assert_exit "19. スペースを含む .md パスは末尾TABをtrimして除外
 
 # =========================================================================
 # 20. jq・python3 両方が不在 -> fail-open（ループガード死の回避）
-#    get_field は両ツール不在時に常に空文字列を返す実装のため、これを検出せず
+#    json_field は両ツール不在時に常に空文字列を返す実装のため、これを検出せず
 #    進行すると stop_hook_active 判定が常に不成立になり、「一度ブロックされ
 #    たら次の停止で必ず通過する」契約が壊れて永久ブロック経路になる。
 #    実際の jq/python3 をアンインストールせず、PATH を jq/python3 を含まない
@@ -319,23 +319,22 @@ commit_file "$repo20" foo.sh $'line1\n'
 write_file "$repo20" foo.sh $'line1\n[DEBUG] leftover\n'
 
 label20="20. jq/python3両不在時はfail-open（ループガード永久ブロック回避）"
-# jq/python3 が両方不在だと get_field は JSON を一切パースできず "cwd" 抽出も
+# jq/python3 が両方不在だと json_field は JSON を一切パースできず "cwd" 抽出も
 # 失敗する（stop_hook_active だけでなく全フィールドが空文字列になる）。よって
 # $PWD フォールバック側も違反ありrepoに固定しないと、テスト実行時のカレント
 # ディレクトリに結果が左右される不安定なテストになってしまう。cd で確実に
 # repo20 に固定した上で、JSONにも同じcwdを冗長に渡す。
 (cd "$repo20" && PATH="$minbin" "$REAL_BASH" "$HOOK" <<<'{"cwd":"'"$repo20"'"}') \
-  >/tmp/debug-log-residue-test-stdout.$$ 2>/tmp/debug-log-residue-test-stderr.$$
+  >"$OUT" 2>"$ERR"
 actual20=$?
 if [ "$actual20" = "0" ]; then
   echo "PASS: $label20 (exit=$actual20)"
   pass=$((pass + 1))
 else
   echo "FAIL: $label20 (expected=0 actual=$actual20)"
-  echo "  stderr: $(cat /tmp/debug-log-residue-test-stderr.$$)"
+  echo "  stderr: $(cat "$ERR")"
   fail=$((fail + 1))
 fi
-rm -f /tmp/debug-log-residue-test-stdout.$$ /tmp/debug-log-residue-test-stderr.$$
 
 # =========================================================================
 # 21. 自己除外の厳密化: サブストリング一致ではなく、ファイル名（basename）が
@@ -348,6 +347,148 @@ commit_file "$repo21" "myblock-debug-log-residue.sh" $'orig\n'
 write_file "$repo21" "myblock-debug-log-residue.sh" $'orig\n[DEBUG] should not be excluded\n'
 assert_exit "21. 自己除外はbasename前方一致のみ: 無関係な部分一致ファイルはブロック" \
   2 '{"cwd":"'"$repo21"'"}'
+
+# =========================================================================
+# 22. index と作業ツリーの差分が相殺されても、コミット候補に残る違反は検出する。
+# =========================================================================
+repo22="$(make_repo)"
+commit_file "$repo22" foo.sh $'line1\n'
+write_file "$repo22" foo.sh $'line1\n[DEBUG] staged residue\n'
+stage_file "$repo22" foo.sh
+write_file "$repo22" foo.sh $'line1\n'
+assert_exit "22. stage後に作業ツリーだけ戻しても --cached 側でブロック" \
+  2 '{"cwd":"'"$repo22"'"}'
+
+# =========================================================================
+# 23. 大きな通常差分にマーカーが無ければ -G 前処理は誤検出しない。
+# =========================================================================
+repo23="$(make_repo)"
+commit_file "$repo23" large.txt $'base\n'
+i=1
+large_content=""
+while [ "$i" -le 200 ]; do
+  large_content="${large_content}ordinary line ${i}"$'\n'
+  i=$((i + 1))
+done
+write_file "$repo23" large.txt "$large_content"
+assert_exit "23. 200行の非マーカー差分は許可" \
+  0 '{"cwd":"'"$repo23"'"}'
+
+# =========================================================================
+# 24. pathspec 前処理と awk 正本の nested tests/ 除外を一致させる。
+# =========================================================================
+repo24="$(make_repo)"
+write_file "$repo24" nested/tests/helper.sh $'[DEBUG] test helper\n'
+stage_file "$repo24" nested/tests/helper.sh
+assert_exit "24. nested/tests/helper.sh の追加マーカーは除外され許可" \
+  0 '{"cwd":"'"$repo24"'"}'
+
+# =========================================================================
+# 25. ディレクトリsymlink経由の起動でもlibが読めてブロックできる
+# =========================================================================
+# 背景: hooks 3本冒頭の symlink解決コード + `cd -P` は、インストール実態
+# （~/.claude/hooks → repo/hooks のディレクトリ symlink）越しでの動作を
+# テストしていない。lib/json.sh が読めない場合フックは fail-open（exit 0）
+# するため、「symlink経由でもブロックが機能する」ケースが lib読込成功の証
+# になる。
+
+fakehome="$TMP_ROOT/fakehome"
+mkdir -p "$fakehome/.claude"
+ln -s "$(cd "$SCRIPT_DIR" && pwd -P)" "$fakehome/.claude/hooks"
+
+repo25="$(make_repo)"
+commit_file "$repo25" foo.sh $'line1\n'
+write_file "$repo25" foo.sh $'line1\n[DEBUG] leftover\n'
+
+label25="25. ディレクトリsymlink経由の起動でもlibが読めてブロックできる"
+printf '{"cwd":"%s"}' "$repo25" | \
+  bash "$fakehome/.claude/hooks/block-debug-log-residue.sh" \
+  >"$OUT" 2>"$ERR"
+actual25=$?
+if [ "$actual25" = "2" ] && grep -qF "foo.sh" "$ERR"; then
+  echo "PASS: $label25"
+  pass=$((pass + 1))
+else
+  echo "FAIL: $label25 (expected_exit=2 actual=$actual25)"
+  echo "  stderr: $(cat "$ERR")"
+  fail=$((fail + 1))
+fi
+
+# =========================================================================
+# 26. ファイルsymlink経由の起動でも実体のlibを解決してブロックできる
+# =========================================================================
+# 背景: テスト25はディレクトリsymlink経由（hooksディレクトリ全体をsymlink）
+# であり、`cd -P` 単独でディレクトリsymlinkが解決されるため while ループ本体
+# は一度も反復しない（検証ギャップ）。ここでは lib/ を持たない一時ディレクトリ
+# に実フックファイルへの**ファイル symlink** を1本だけ張り、while ループが
+# 実際に1回以上反復して実体ディレクトリ（lib/を持つ）へ辿り着くことを検証する。
+
+filesymlink_dir="$TMP_ROOT/filesymlink"
+mkdir -p "$filesymlink_dir"
+ln -s "$(cd "$SCRIPT_DIR" && pwd -P)/block-debug-log-residue.sh" \
+  "$filesymlink_dir/block-debug-log-residue.sh"
+
+repo26="$(make_repo)"
+commit_file "$repo26" foo.sh $'line1\n'
+write_file "$repo26" foo.sh $'line1\n[DEBUG] leftover\n'
+
+label26="26. ファイルsymlink経由の起動でも実体のlibを解決してブロックできる"
+printf '{"cwd":"%s"}' "$repo26" | \
+  bash "$filesymlink_dir/block-debug-log-residue.sh" \
+  >"$OUT" 2>"$ERR"
+actual26=$?
+if [ "$actual26" = "2" ] && grep -qF "foo.sh" "$ERR"; then
+  echo "PASS: $label26"
+  pass=$((pass + 1))
+else
+  echo "FAIL: $label26 (expected_exit=2 actual=$actual26)"
+  echo "  stderr: $(cat "$ERR")"
+  fail=$((fail + 1))
+fi
+
+# =========================================================================
+# 27. symlink 反復上限を超えるチェーンは fail-open で許可
+# =========================================================================
+# 背景: 真の循環symlink（a→b→a）を `bash a` で直接起動すると、本フックの
+# while ループへ到達する前に OS 自身の symlink 解決（open(2) の
+# MAXSYMLINKS）が ELOOP で弾く（このホストで実測: 32ホップ目で
+# "Too many levels of symbolic links" / exit 126）。つまり循環そのものは
+# bash がスクリプトを読み込む時点で必ず先に失敗し、本ループのガードコードへ
+# 到達しない（フェイルオープンの exit 0 にはならない）。
+# よって本ループの反復上限ガードを実際に踏ませて検証できるのは「循環では
+# ないが正当な長さを超える symlink チェーン」であり、これが唯一の現実的な
+# 到達経路である。OS の上限（実測32）より十分小さいがフック側の上限
+# （10）よりは長い、15ホップの非循環チェーンを組み、フック側の上限で
+# fail-open することを確認する。
+# =========================================================================
+repo27="$(make_repo)"
+commit_file "$repo27" foo.sh $'line1\n'
+write_file "$repo27" foo.sh $'line1\n[DEBUG] leftover\n'
+
+longchain_dir="$TMP_ROOT/longchain"
+mkdir -p "$longchain_dir"
+real_hook="$(cd "$SCRIPT_DIR" && pwd -P)/block-debug-log-residue.sh"
+chain_target="$real_hook"
+i=15
+while [ "$i" -ge 1 ]; do
+  link="$longchain_dir/link$(printf '%02d' "$i").sh"
+  ln -s "$chain_target" "$link"
+  chain_target="$link"
+  i=$((i - 1))
+done
+chain_entry="$longchain_dir/link01.sh"
+
+label27="27. symlink反復上限(15ホップ > 上限)を超えるチェーンはfail-openで許可"
+printf '{"cwd":"%s"}' "$repo27" | bash "$chain_entry" >"$OUT" 2>"$ERR"
+actual27=$?
+if [ "$actual27" = "0" ]; then
+  echo "PASS: $label27"
+  pass=$((pass + 1))
+else
+  echo "FAIL: $label27 (expected=0 actual=$actual27)"
+  echo "  stderr: $(cat "$ERR")"
+  fail=$((fail + 1))
+fi
 
 echo "----"
 echo "pass=$pass fail=$fail"
