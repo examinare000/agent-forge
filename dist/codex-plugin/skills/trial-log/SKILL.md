@@ -87,9 +87,9 @@ trial-log は完成後にまとめる報告書ではない。**開発中ずっ�
 
 ## 書き手
 
-Write/Edit 権限を持つワーカー（`tdd-strict-coder` / `implementation-coder` / `testability-architect`、およびメインセッション）は、作業中に発生した試行・棄却・方針転換を**自分で `docs/trial-log/` へ追記・更新する**（live 運用。試行を1つ終えたその場・アプローチ切り替え時・REJECT 判定を受けた時がトリガ）。前提はワーカー本人しか持たない情報なので、本人が記録することで欠落を防ぐ。
+Write/Edit 権限を持つワーカー（`tdd-strict-coder` / `implementation-coder`、およびメインセッション）は、作業中に発生した試行・棄却・方針転換を**自分で `docs/trial-log/` へ追記・更新する**（live 運用。試行を1つ終えたその場・アプローチ切り替え時・REJECT 判定を受けた時がトリガ）。前提はワーカー本人しか持たない情報なので、本人が記録することで欠落を防ぐ。
 
-`code-reviewer` / `ai-antipattern-reviewer` / `adversarial-verifier` は read-only（Write/Edit を持たない検疫設計）のため、自分で追記する書き手には含めない。これらは**読む義務 + 報告への記載**を負う: 着手前に `docs/trial-log/` を読み、棄却理由の妥当性を検証し、異議や新たな棄却知見（REJECT 判定を出した場合はその判定根拠を含む）を完了報告に含める。オーケストレーター（メインセッション）が報告を事実確認したうえで `docs/trial-log/` へ転記する。
+Write/Edit を持たないエージェント（`testability-architect` / `code-reviewer` / `ai-antipattern-reviewer` / `adversarial-verifier`）は自分で追記する書き手には含めない。これらは**読む義務 + 報告への記載**を負う: 着手前に `docs/trial-log/` を読み、棄却理由の妥当性を検証し、異議や新たな棄却知見（REJECT 判定を出した場合はその判定根拠を含む）を完了報告に含める。オーケストレーター（メインセッション）が報告を事実確認したうえで `docs/trial-log/` へ転記する。
 
 ワーカーの報告に前提が欠けている場合は把握している範囲で補い、補えなければ「不明（ワーカー未報告）」と書く。**推測で埋めない。**
 
