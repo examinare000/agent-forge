@@ -37,7 +37,7 @@
 | AI アンチパターン検査（read-only） | `ai-antipattern-reviewer` |
 | Git 操作（ブランチ / コミット / PR） | `git-composer` |
 | 計画・結論の敵対的検証（反証ファースト・read-only） | `adversarial-verifier` |
-| OpenAI Codex へのオフロード（実装 / 診断 / 修正） | `codex:codex-rescue`（codex plugin 導入時） |
+| OpenAI Codex への委譲（実装 / 診断 / 修正 / 設計第2案 / クロスベンダー第3票 / 深い根本原因調査） | `codex:codex-rescue`（codex plugin 導入時） |
 
 モデルピンの正本は `~/.claude/rules/hosts/claude/02-model-fallback-matrix.md`（実効値は各エージェント定義の frontmatter）。
 
@@ -50,8 +50,8 @@
 - **質問返しプロトコル**: 判断に迷ったワーカーは推測せず停止し、`NEEDS_DECISION`（具体的な質問 + 選択肢 + 自身の推奨）を返す。回答は SendMessage で**同じ**エージェントへ送り、途中成果を生かす。コンテキストが壊れた場合のみ新規に再委譲する。Codex は非対話: 判断事項はブリーフで事前に解決し、Codex が推測してしまった場合は `--resume` で回答を添えて再実行する。`BLOCKED` / `DONE_WITH_CONCERNS` は前提修正・タスク分割・ユーザーへのエスカレーションのいずれかを判断してから先に進む。この「継続ファースト」プロトコルは、質問時に再委譲せよと書くスキル文面（例: `subagent-driven-development`）に優先する。
 - 完了を宣言する前に `test-runner` で検証する（マージ前は `code-reviewer` も）。
 - 独立したタスクはエージェントを並列起動する（1メッセージに複数の Agent 呼び出し）。
-- **非自明な実装**（複数の妥当なアプローチ / 新規性のある設計面 / 過去に失敗した試み）→ Skill `dual-track-proposals`: クロスベンダー（codex plugin 導入時）× sonnet の競合提案、未導入時は sonnet × sonnet の独立2案。オーケストレーターが採用または統合し、単一の実装者が適用する。実装アプローチのレベルに限る — アーキテクチャレベルの設計は先に `testability-architect` へ。
-- **Codex 委譲**（codex plugin 導入時）: `codex:codex-rescue`（または `/codex:rescue`）は純粋なフォワーダ — Codex を実行するが検証もコミットもしない。返ってきたらオーケストレーターがゲートを担う: `test-runner` で検証し、差分をレビューし、`git-composer` でコミットする。Codex によるコードレビューは `/codex:review`。
+- **非自明な実装**（複数の妥当なアプローチ / 新規性のある設計面 / 過去に失敗した試み）→ Skill `dual-track-proposals`: クロスベンダー（codex plugin 導入時）× 自ベンダー Tier B の競合提案、未導入時は Tier B × Tier B の独立2案（ティア対応は `~/.claude/rules/hosts/claude/02-model-fallback-matrix.md`）。両案は同格であり、出自ではなく内容で評価する。オーケストレーターが採用または統合し、単一の実装者が適用する。実装アプローチのレベルに限る — アーキテクチャレベルの設計は先に `testability-architect` へ。
+- **Codex 委譲**（codex plugin 導入時）: `codex:codex-rescue`（または `/codex:rescue`）は純粋なフォワーダ — Codex を実行するが検証もコミットもしない。返ってきたらオーケストレーターがゲートを担う: `test-runner` で検証し、差分をレビューし、`git-composer` でコミットする。Codex によるコードレビューは `/codex:review`。Codex（クロスベンダー最上位ティア）は Tier A 同格の判断役であり、オフロード先に限定しない — 設計提案・第3票に用いてよい。ただし完了ゲートの `adversarial-verifier` PASS の免除にはならない（通常運用では追加の独立判断入力。代替検証役に立てるのは検証役を自ベンダー Tier A で維持できない場合のみで、発動をその旨1行宣言し read-only で起動する。正本: `~/.claude/rules/02-model-fallback-matrix.md`）。
 
 ## Model tier policy（モデルティア方針）
 正本: `~/.claude/rules/02-model-fallback-matrix.md`（ティア定義・義務・格下げ順序・自己ティア判定）。

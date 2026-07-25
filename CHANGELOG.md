@@ -26,6 +26,7 @@
 - trial-log の正準分担を一本化（rules/94 = トリガ、rules/30 = 配置・読む義務・ライフサイクル、Skill trial-log = 手続き・書式。rules/30 の重複詳細を Skill へ移設）
 - claude/CLAUDE.core.md の委譲表からモデル列を削除（ピンの正本は rules/hosts/claude/02 へ一本化）、rules/hosts/claude/91 のエージェント一覧をポインタ化
 - README のディレクトリツリーを表形式へ変換（rules/30 アスキーアート禁止への自己準拠）
+- クロスベンダー最上位ティアモデル（Codex 等）の位置づけをオフロード先から Tier A 同格の判断役へ格上げ（設計第2案・第3票、および検証役を自ベンダー Tier A で維持できない場合に限る read-only の代替検証役 — 通常運用の adversarial-verifier PASS ゲートは維持。rules/02・rules/03・claude/CLAUDE.core.md・skills/dual-track-proposals・rules/hosts/claude/02 に能力ベースで明記）
 
 ### Fixed
 - trial-log の書き手指定を実権限と整合（read-only レビュアー 3 種は「読む義務 + 報告経由でメインが転記」方式へ。rules/94・rules/30・Skill・エージェント定義の四者を統一）
