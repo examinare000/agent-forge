@@ -4,7 +4,7 @@
 
 フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.0.0/) に従います。
 
-## [未リリース]
+## [0.3.0] - 2026-07-25
 
 エージェント定義の正規化と hook テスト整備。
 
