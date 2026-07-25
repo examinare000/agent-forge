@@ -6,6 +6,8 @@
 
 ## [未リリース]
 
+## [0.5.0] - 2026-07-25
+
 ### Added
 - `hooks/lib/json.sh`: 3 フック共通の JSON 抽出ライブラリ（jq→python3 フォールバック・ドット記法・fail-open 契約・symlink 安全な source）。jq 不在環境でも全フックが機能するようになった
 - `hooks/settings-parity.test.sh`: settings.base.json のフック参照と hooks/ 実体の整合検査（フック改名の出荷漏れを CI で検出）
