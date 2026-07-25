@@ -1,6 +1,6 @@
 ---
 name: baseline-ui
-description: Enforces an opinionated UI baseline to prevent AI-generated interface slop.
+description: Enforces an opinionated UI baseline to prevent AI-generated interface slop. Use when building or styling any web UI (components, pages, dashboards) and no more specific design skill applies.
 ---
 
 # Baseline UI

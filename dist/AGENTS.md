@@ -431,7 +431,7 @@ Skill `retrospect` は別頒布の recall リポジトリに同梱される。�
 
 | name | description |
 | --- | --- |
-| `baseline-ui` | Enforces an opinionated UI baseline to prevent AI-generated interface slop. |
+| `baseline-ui` | Enforces an opinionated UI baseline to prevent AI-generated interface slop. Use when building or styling any web UI (components, pages, dashboards) and no more specific design skill applies. |
 | `deep-reasoning` | 難易度の高いタスク（設計判断・非可逆操作・曖昧な要求・修正失敗後）で、問題再述→前提台帳→仮説と反証→代替案比較→プレモーテムを機械的に実行する深い推論の手続き。「設計して」「どう思う」「難しい問題」依頼時、および非自明タスク（発火チェックリスト 1 項目以上該当）全てで使用。 |
 | `dual-track-proposals` | Use when delegating a non-trivial implementation task — multiple plausible approaches, novel design surface, or a prior failed attempt. |
 | `frontend-design` | Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics. |
