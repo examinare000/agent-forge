@@ -35,6 +35,12 @@ jobs:
       - name: block-debug-log-residue hook test
         run: bash hooks/block-debug-log-residue.test.sh
 
+      - name: lint-after-edit hook test
+        run: bash hooks/lint-after-edit.test.sh
+
+      - name: backup-before-compact hook test
+        run: bash hooks/backup-before-compact.test.sh
+
       - name: evals harness selftest
         run: bash evals/harness-selftest.sh
 
@@ -44,6 +50,8 @@ jobs:
         run: |
           python3 generators/build.py
           git diff --exit-code dist/
+          # git diff は未追跡ファイルを検出しないため、生成物の追加漏れは status で拾う
+          test -z "$(git status --porcelain dist/)"
 
   gitleaks:
     runs-on: ubuntu-latest

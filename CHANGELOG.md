@@ -6,17 +6,20 @@
 
 ## [未リリース]
 
+エージェント定義の正規化と hook テスト整備。
+
 ### Added
-- N/A
+- Hook テストスイート整備: lint-after-edit.test.sh・backup-before-compact.test.sh を CI に統合
+- claude/settings.base.json に hook タイムアウト設定を明示化（lint-after-edit=30s, block-debug-log-residue=15s, backup-before-compact=30s）
+- baseline-ui スキルの SKILL.md に WHEN 節（「any web UI」トリガー）を追記し、発見可能性向上
 
 ### Changed
-- N/A
-
-### Deprecated
-- N/A
+- 全エージェント定義から Persistent Agent Memory セクション (Claude Code ハーネス自動注入による重複) を削除（implementation-coder -144行、tdd-strict-coder -140行、testability-architect -139行、dist/ 生成物 -422 行）
+- implementation-coder.md のプロジェクト規約セクションを参照型に短縮（冗長性排除）
+- effort 設定を frontmatter に明示化: implementation-coder=low、test-runner=low、git-composer=medium
 
 ### Removed
-- N/A
+- testability-architect エージェント frontmatter から Edit・Write ツール除去（read-only 宣言強化）→ Codex 側で sandbox_mode=read-only に自動変換
 
 ### Fixed
 - N/A
