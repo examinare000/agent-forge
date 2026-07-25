@@ -25,9 +25,10 @@ Scope boundary: `testability-architect` owns architecture-level decisions (modul
 
 1. **One shared brief** (orchestrator): goal / target files / constraints / done-criteria (test command) / decisions already made. Identical text to both agents. Self-contained — no session history, no plan-file reading.
 2. **Parallel dispatch** (one message, two Agent calls):
-   - `codex:codex-rescue` (Codex plugin 導入時。未導入なら Sonnet 独立2案で代替) — state read-only explicitly in the task text (propose only, do not edit) so the forwarder does not add `--write`. Ask for design approach + change outline (files touched, pseudo-diff level).
-   - `tdd-strict-coder` — proposal mode: the brief states "proposal-only, no edits"; returns design approach + planned diff outline + test strategy.
-3. **Compare** (orchestrator): score both on correctness / simplicity / testability / fit with existing code / risk. Adopt the better one, or merge — take the winning skeleton and graft superior ideas from the other. Record 1–3 lines of rationale (what was adopted, what was discarded, why).
+   - `codex:codex-rescue` (クロスベンダー最上位ティア導入時) — state read-only explicitly in the task text (propose only, do not edit) so the forwarder does not add `--write`. Ask for design approach + change outline (files touched, pseudo-diff level).
+   - `tdd-strict-coder` (同格の第2トラック) — proposal mode: the brief states "proposal-only, no edits"; returns design approach + planned diff outline + test strategy.
+   - If no cross-vendor track is installed, fall back to two independent proposals from Tier B coders (未導入時の代替).
+3. **Compare** (orchestrator): both proposals are peers — score each on correctness / simplicity / testability / fit with existing code / risk, evaluated by content not origin. Adopt the better one, or merge — take the winning skeleton and graft superior ideas from the other. Record 1–3 lines of rationale (what was adopted, what was discarded, why).
 4. **Single implementation**: hand the fixed spec to `tdd-strict-coder` (or `implementation-coder` when fully spec-fixed). Normal gates follow: `verification-before-completion` (run via `test-runner`) → `review-ai-antipattern` → `adversarial-verifier` → pre-merge checklist.
 
 ## Escalation Overlay
