@@ -129,9 +129,11 @@ agent-forge/
 │   └── ai-antipattern-reviewer.md
 ├── hooks/                         # 編集ゲート
 │   ├── backup-before-compact.sh
+│   ├── backup-before-compact.test.sh
 │   ├── block-debug-log-residue.sh
 │   ├── block-debug-log-residue.test.sh
-│   └── lint-after-edit.sh
+│   ├── lint-after-edit.sh
+│   └── lint-after-edit.test.sh
 ├── evals/                         # 回帰テスト
 │   ├── run-evals.sh
 │   ├── harness-selftest.sh

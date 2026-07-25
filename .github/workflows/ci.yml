@@ -35,6 +35,12 @@ jobs:
       - name: block-debug-log-residue hook test
         run: bash hooks/block-debug-log-residue.test.sh
 
+      - name: lint-after-edit hook test
+        run: bash hooks/lint-after-edit.test.sh
+
+      - name: backup-before-compact hook test
+        run: bash hooks/backup-before-compact.test.sh
+
       - name: evals harness selftest
         run: bash evals/harness-selftest.sh
 
