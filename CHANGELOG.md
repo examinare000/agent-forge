@@ -6,6 +6,12 @@
 
 ## [未リリース]
 
+### Added
+- **trial-log スキル同梱**: 開発中の試行記録（docs/trial-log/）を live-docs として運用する手続きスキルを新規追加。ワーカーが試行を1つ終えるたび自発的に記録し、同じ失敗の繰り返し・棄却済み案の再試行を防ぐメカニズムを実装
+- trial-log 記録義務を 4 エージェント（`implementation-coder` / `tdd-strict-coder` / `code-reviewer` / `testability-architect`）に配線
+- `rules/30-documentation-management.md` に trial-log 節を拡充（配置・単位・読む義務・ライフサイクルの詳細）
+- `rules/94-self-improvement-protocol.md` に in-flight 記録セクション（trial-log）と (t2)(t3) トリガ（棄却・REJECT に基づく方針変更）を追記
+
 ### Fixed
 - ai-antipattern-reviewer に effort: high を明示（0.3.0 の effort 明示化で唯一漏れていたエージェント）
 
