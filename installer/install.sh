@@ -99,6 +99,7 @@ install_hint_for() {
   local name="$1" os_key
   case "$(uname -s)" in
     Darwin) os_key="darwin" ;;
+    Linux) os_key="linux" ;;
     *) os_key="darwin" ;;
   esac
   jq -r --arg os "${os_key}" --arg name "${name}" '.prereqs.installHints[$os][$name] // ""' "${MANIFEST_JSON}"
@@ -177,6 +178,10 @@ link_entries() {
 
 # --- superpowers -----------------------------------------------------------
 ensure_superpowers() {
+  if [ ! -f "${SUPERPOWERS_LOCK_FILE}" ]; then
+    log_warn "superpowers.lock が見つからないため superpowers 同期を skip します"
+    return 0
+  fi
   log_info "--- superpowers ---"
   local lock_sha
   lock_sha="$(tr -d '[:space:]' < "${SUPERPOWERS_LOCK_FILE}")"
