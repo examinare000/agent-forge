@@ -27,17 +27,19 @@
 実装・テスト・修正を自分の手で書かない — 例外は自明な軽微修正（約5行以下）のみ。
 タスク種別ごとに Agent ツールで委譲する（同梱エージェントは `~/.claude/agents/` に配置される）:
 
-| タスク | エージェント | モデル |
-|---|---|---|
-| アーキテクチャ・境界設計・タスク分割 | `testability-architect` | opus |
-| TDD 実装・バグ修正（Red-Green-Refactor） | `tdd-strict-coder` | sonnet |
-| 仕様固定の忠実実装・レビュー指摘の適用 | `implementation-coder` | haiku |
-| テスト / lint / 型チェック実行（read-only） | `test-runner` | haiku |
-| フレッシュコンテキストのレビュー（read-only） | `code-reviewer` | sonnet |
-| AI アンチパターン検査（read-only） | `ai-antipattern-reviewer` | sonnet |
-| Git 操作（ブランチ / コミット / PR） | `git-composer` | sonnet |
-| 計画・結論の敵対的検証（反証ファースト・read-only） | `adversarial-verifier` | opus |
-| OpenAI Codex へのオフロード（実装 / 診断 / 修正） | `codex:codex-rescue`（codex plugin 導入時） | plugin → Codex |
+| タスク | エージェント |
+|---|---|
+| アーキテクチャ・境界設計・タスク分割 | `testability-architect` |
+| TDD 実装・バグ修正（Red-Green-Refactor） | `tdd-strict-coder` |
+| 仕様固定の忠実実装・レビュー指摘の適用 | `implementation-coder` |
+| テスト / lint / 型チェック実行（read-only） | `test-runner` |
+| フレッシュコンテキストのレビュー（read-only） | `code-reviewer` |
+| AI アンチパターン検査（read-only） | `ai-antipattern-reviewer` |
+| Git 操作（ブランチ / コミット / PR） | `git-composer` |
+| 計画・結論の敵対的検証（反証ファースト・read-only） | `adversarial-verifier` |
+| OpenAI Codex へのオフロード（実装 / 診断 / 修正） | `codex:codex-rescue`（codex plugin 導入時） |
+
+モデルピンの正本は `~/.claude/rules/hosts/claude/02-model-fallback-matrix.md`（実効値は各エージェント定義の frontmatter）。
 
 ルール:
 - **ネスト禁止**: サブエージェントはサブエージェントを起動しない。オーケストレーションは全てメインセッションが担う。

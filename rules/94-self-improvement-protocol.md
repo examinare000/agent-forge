@@ -24,7 +24,7 @@ Skill `retrospect` と retrospective-analyst は**別頒布の recall リポジ�
 ## in-flight 記録: trial-log（開発ノート）
 
 作業中（＝そのタスクが終わる前）に、**独立して結果を確認できる試行を1つ終えるたび**、その場で `docs/trial-log/` へ追記する。あわせて「現在地」を書き直す（live-docs として運用し、最後にまとめて書かない）。
-配置・単位・読む義務・ライフサイクルは `30-documentation-management.md`「trial-log」節、**手続きと書式は Skill `trial-log`** が正本。Write/Edit 権限を持つワーカー（`tdd-strict-coder` / `implementation-coder` / `code-reviewer` 等レビュアー、および `testability-architect`）は自分で追記・更新し、読み取り専用ワーカーは報告のみ行う。オーケストレーターは事実確認と修正判断を行う。
+配置・単位・読む義務・ライフサイクルは `30-documentation-management.md`「trial-log」節、**手続きと書式は Skill `trial-log`** が正本。Write/Edit 権限を持つワーカー（`tdd-strict-coder` / `implementation-coder`）は自分で追記・更新し、read-only のレビュアー・検証役（`code-reviewer` / `ai-antipattern-reviewer` / `adversarial-verifier` / `testability-architect`）と読み取り専用ワーカーは報告に含め、オーケストレーターが転記する。オーケストレーターは事実確認と修正判断を行う。
 
 **成功した試行の扱い**: ADR・設計書・コミットログに正本が残るものは trial-log で再記述せず、**1行の参照に留める**（重複記録の禁止）。正本がまだ無い段階の成功試行（後で ADR にまとめる予定のもの）は通常どおり本文に書く。この運用の結果、蓄積されるエントリは失敗・棄却が中心になる。
 

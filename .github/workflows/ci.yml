@@ -23,6 +23,12 @@ jobs:
       - name: generators selftest
         run: bash generators/selftest.sh
 
+      - name: agent-blocks drift check
+        run: bash generators/check-agent-blocks.sh
+
+      - name: check-agent-blocks selftest
+        run: bash generators/check-agent-blocks.test.sh
+
       - name: scaffold new-project smoke test
         run: bash scaffold/new-project.test.sh
 

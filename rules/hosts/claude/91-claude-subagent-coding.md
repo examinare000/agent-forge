@@ -6,16 +6,8 @@
 ## 適用条件＆エージェント一覧
 - 専門的なレビュー・実装・タスク分割が必要な場合に、メイン（オーケストレーター）が Task ツールで起動する。
 
-同梱 8 エージェント（installer が `~/.claude/agents/` に配置。モデルピンは `02-model-fallback-matrix.md`（Claude 対応表）参照）:
-
-- **testability-architect**: 設計・境界・タスク分解（➔ 設計方針・タスク分割案）
-- **tdd-strict-coder**: 実装/TDD（Red-Green-Refactor ➔ 実装・テストコード）
-- **implementation-coder**: 仕様固定の忠実実装・レビュー指摘の適用（➔ 差分）
-- **test-runner**: テスト・lint・型チェックの実行と報告（read-only ➔ 結果要約）
-- **code-reviewer**: コード/総合品質レビュー（TDD遵守・コミット粒度・規約含む ➔ 改善指摘/承認）
-- **ai-antipattern-reviewer**: AI手抜き検出（➔ 手抜き指摘/リファクタ案）
-- **adversarial-verifier**: 推論成果物（計画/設計/完了宣言/調査結論）の反証ファースト検証（➔ PASS/REJECT）
-- **git-composer**: コミット・統合（完了直前 ➔ アトミックコミット/PR）
+同梱 8 エージェントの役割と委譲先の対応表は `CLAUDE.core.md`「Orchestration & delegation」が正本（installer が `~/.claude/agents/` に配置）。
+モデルピンは `02-model-fallback-matrix.md`（Claude 対応表）を参照。
 
 ## 品質ゲートの運用フロー
 1. **Worker起動**: メイン Claude が適切なサブエージェントを Task ツールで起動。
