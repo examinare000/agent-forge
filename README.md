@@ -91,65 +91,19 @@ v0.4.0 リリース済み
 
 ### ディレクトリ構成
 
-```
-agent-forge/
-├── bin/                            # 統一CLI
-│   └── forge                      # install/new/check の薄いディスパッチャ
-├── rules/                          # 規範・戦略ドキュメント（10-29・70-89は採用者が追加する意図的な空き番帯）
-│   ├── 00-core-principles.md      # コア原則
-│   ├── 02-model-fallback-matrix.md # モデルティア運用マトリクス
-│   ├── 03-agent-behavior.md       # エージェント挙動規範
-│   ├── 12-security-guidelines.md  # セキュリティ
-│   ├── 13-readability.md          # 可読性
-│   ├── 30-documentation-management.md  # ドキュメント管理
-│   ├── 50-production-reliability.md    # 本番信頼性
-│   ├── 93-deep-reasoning-protocol.md   # 深度推論プロトコル
-│   ├── 94-self-improvement-protocol.md  # 自己改善プロトコル
-│   ├── hosts/claude/              # Claude固有の規範
-│   │   ├── 01-claude-behavior.md
-│   │   ├── 02-model-fallback-matrix.md
-│   │   ├── 91-claude-subagent-coding.md
-│   │   └── 92-plan-mode-protocol.md
-│   └── README.md
-├── skills/                        # 手続きスキル
-│   ├── baseline-ui/
-│   ├── dual-track-proposals/
-│   ├── frontend-design/
-│   ├── deep-reasoning/
-│   ├── plan-deep-research/
-│   ├── review-ai-antipattern/
-│   └── trial-log/
-├── agents/                        # サブエージェント定義
-│   ├── testability-architect.md
-│   ├── tdd-strict-coder.md
-│   ├── implementation-coder.md
-│   ├── test-runner.md
-│   ├── code-reviewer.md
-│   ├── git-composer.md
-│   ├── adversarial-verifier.md
-│   └── ai-antipattern-reviewer.md
-├── hooks/                         # 編集ゲート
-│   ├── backup-before-compact.sh
-│   ├── backup-before-compact.test.sh
-│   ├── block-debug-log-residue.sh
-│   ├── block-debug-log-residue.test.sh
-│   ├── lint-after-edit.sh
-│   └── lint-after-edit.test.sh
-├── evals/                         # 回帰テスト
-│   ├── run-evals.sh
-│   ├── harness-selftest.sh
-│   ├── README.md
-│   └── tasks/
-├── claude/                        # Claude Code用設定（.claudeから参照）
-├── installer/                     # インストール関連（install.sh・manifest.json等）
-├── scaffold/                      # 新規プロジェクト雛形生成（new-project.sh・templates/）
-├── generators/                    # 多ベンダー向け指示ファイル生成器（build.py）
-├── dist/                          # 生成物・配布（AGENTS.md・GEMINI.md・codex-plugin/・codex-agents/）
-├── LICENSE
-├── README.md
-├── CONTRIBUTING.md
-└── CHANGELOG.md
-```
+| ディレクトリ | 役割 |
+|---|---|
+| `bin/` | 統一CLI（`forge` — install/new/check の薄いディスパッチャ） |
+| `rules/` | 規範・戦略ドキュメント（番号レイヤ制。10-29・70-89 は採用者が追加する意図的な空き番帯。`hosts/claude/` に Claude 固有規範） |
+| `skills/` | 手続きスキル（deep-reasoning・plan-deep-research・review-ai-antipattern・trial-log・dual-track-proposals・baseline-ui・frontend-design） |
+| `agents/` | サブエージェント定義 8 本（architect / coder×2 / reviewer×2 / verifier / test-runner / git-composer） |
+| `hooks/` | 編集・停止ゲート（lint-after-edit・block-debug-log-residue・backup-before-compact、各 .test.sh 付き） |
+| `evals/` | 回帰テスト（golden tasks。手動実行専用） |
+| `claude/` | Claude Code 用設定（CLAUDE.core.md・settings.base.json） |
+| `installer/` | インストール関連（install.sh・manifest.json 等） |
+| `scaffold/` | 新規プロジェクト雛形生成（new-project.sh・templates/） |
+| `generators/` | 多ベンダー向け指示ファイル生成器（build.py・hosts.toml） |
+| `dist/` | 生成物・配布（AGENTS.md・GEMINI.md・codex-plugin/・codex-agents/） |
 
 ### コマンドリファレンス
 
