@@ -16,7 +16,7 @@ shopt -s nullglob 2>/dev/null || true
 
 # リポジトリルートへ移動
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 fail=0
 note() { printf '  - %s\n' "$1"; }

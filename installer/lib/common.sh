@@ -84,6 +84,8 @@ report_fail() {
 # 前提は持たない — 頒布用インストーラは任意の clone 位置で動く必要がある）。
 # common.sh は installer/lib/ にあるので2階層上がrepo root。
 COMMON_SH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
+# shellcheck disable=SC2034 # common.sh は install.sh に source されるライブラリで、
+# REPO_ROOT はこのファイル単体では未使用でも install.sh 側から参照される契約。
 REPO_ROOT="$(cd "${COMMON_SH_DIR}/../.." && pwd -P)"
 
 # テストから差し替え可能にするため、既に環境変数で与えられていればそれを使う。

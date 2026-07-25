@@ -7,10 +7,19 @@
 ## [未リリース]
 
 ### Added
+- `hooks/lib/json.sh`: 3 フック共通の JSON 抽出ライブラリ（jq→python3 フォールバック・ドット記法・fail-open 契約・symlink 安全な source）。jq 不在環境でも全フックが機能するようになった
+- `hooks/settings-parity.test.sh`: settings.base.json のフック参照と hooks/ 実体の整合検査（フック改名の出荷漏れを CI で検出）
+- `scaffold/templates/scripts/check-docs.test.sh`: check-docs.sh の 6 挙動のスモークテスト
+- CI: test ジョブの macOS マトリクスレーン（公式サポート OS を初めて CI 化）と lint ジョブ（shellcheck / py_compile / JSON 妥当性）
 - 正準ブロック機構: `generators/agent-blocks/` に共有ブロック 6 種（報告規範・進行規範・trial-log 義務×2・no-nesting・アンチパターン5軸）を正本として新設し、`generators/check-agent-blocks.sh` が対象 24 箇所へのバイト一致埋め込みを CI で検査（回帰テスト `check-agent-blocks.test.sh` 付き）
 - `docs/trial-log/`・`docs/adr/` の運用開始（dogfooding。ADR-001: 正準ブロック方式、ADR-002: trial-log 書き手ロスター）
 
 ### Changed
+- `block-debug-log-residue.sh`: `-G` プレフィルタと exclude pathspec で毎停止のフルスキャンを排除（200k 行クリーン差分で 457ms → 174ms）。cwd がサブディレクトリでも常にリポジトリ最上位から走査
+- `lint-after-edit.sh`: find_up のパラメータ化、linter クラッシュ（exit≥2）の fail-open 化（lint 指摘との誤報告を解消）、eslint `--cache` 付与
+- `backup-before-compact.sh`: trigger のサニタイズ、`$$` ノンスで同一秒衝突を解消、prune を全拡張子対象化、HOME 未設定ガード
+- installer: superpowers.lock 欠落時の set -e 裸死を warn+skip へ、manifest に Linux 向け install hints を追加
+- 全 shell スクリプトを shellcheck warning 0 件に整備、hook テストのスクラッチ出力を TMP_ROOT 配下へ移動（リーク解消）
 - エージェント選択インデックスの常時トークン削減: 4 エージェント（tdd-strict-coder / implementation-coder / ai-antipattern-reviewer / testability-architect）の frontmatter description を compact 形式へ圧縮（合計 10.5KB → 4.7KB、毎セッション約 5.7KB 削減）
 - 8 エージェント定義に複製されていた報告規範・trial-log 義務・no-nesting 規律を正準ブロックへ統一し、tdd-strict-coder の no-commit 3 重記述等の冗長を圧縮
 - アンチパターン分類を 5 軸チェックリストへ統一（skills/review-ai-antipattern と agents/ai-antipattern-reviewer の乖離を解消。スキルとエージェントにバイト一致で同一分類を埋め込み）

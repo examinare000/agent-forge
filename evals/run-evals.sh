@@ -111,6 +111,7 @@ else
     echo ""
     echo "=== タスク: $task_name ==="
     (
+      # shellcheck disable=SC1090  # タスクファイルは実行時列挙のため静的解決不能
       source "$task_file"
       run_task
     )

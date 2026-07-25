@@ -169,7 +169,7 @@ run_install() {
 echo "=== ①: 新規環境へのインストール ==="
 
 read -r repo home < <(build_fake_repo "fresh-install")
-out="$(run_install "${repo}" "${home}")"
+run_install "${repo}" "${home}" >/dev/null
 rc=$?
 assert_rc "新規インストール: exit 0" 0 "${rc}"
 
@@ -264,7 +264,7 @@ else
   fi
 fi
 
-out3f="$(run_install "${repo}" "${home}" --force)"
+run_install "${repo}" "${home}" --force >/dev/null
 rc3f=$?
 assert_rc "--force指定時: exit 0" 0 "${rc3f}"
 assert_symlink_target "--force指定時: rulesがsymlinkに置換される" "${home}/.claude/rules" "${repo}/rules"
@@ -293,7 +293,7 @@ read -r repo home < <(build_fake_repo "uninstall")
 run_install "${repo}" "${home}" >/dev/null
 # uninstallの対象外である実ファイル（settings.json, superpowers clone）が
 # 誤って除去されないことも併せて確認する。
-out5="$(run_install "${repo}" "${home}" --uninstall)"
+run_install "${repo}" "${home}" --uninstall >/dev/null
 rc5=$?
 assert_rc "--uninstall: exit 0" 0 "${rc5}"
 
@@ -396,7 +396,7 @@ git clone --quiet "file://${SUPERPOWERS_ORIGIN}" "${home}/.claude/plugins/superp
 git -C "${home}/.claude/plugins/superpowers" checkout --quiet "${SUPERPOWERS_ORIGIN_SHA_OLD}"
 printf '%s' "${SUPERPOWERS_ORIGIN_SHA_NEW}" > "${repo}/installer/superpowers.lock"
 
-out8="$(run_install "${repo}" "${home}")"
+run_install "${repo}" "${home}" >/dev/null
 rc8=$?
 assert_rc "superpowers追従: exit 0" 0 "${rc8}"
 sp_sha8="$(git -C "${home}/.claude/plugins/superpowers" rev-parse HEAD)"
@@ -405,6 +405,59 @@ if [ "${sp_sha8}" = "${SUPERPOWERS_ORIGIN_SHA_NEW}" ]; then
   pass=$((pass + 1))
 else
   echo "FAIL: 既存cloneのSHAが更新されない (期待=${SUPERPOWERS_ORIGIN_SHA_NEW} 実際=${sp_sha8})"
+  fail=$((fail + 1))
+fi
+
+echo "=== ⑨: superpowers.lock 欠落は警告して同期をskip ==="
+
+read -r repo home < <(build_fake_repo "missing-superpowers-lock")
+rm "${repo}/installer/superpowers.lock"
+out9="$(run_install "${repo}" "${home}")"
+rc9=$?
+assert_rc "superpowers.lock 欠落: 全体は exit 0" 0 "${rc9}"
+assert_contains "superpowers.lock 欠落: skip警告" "${out9}" \
+  "superpowers.lock が見つからないため superpowers 同期を skip します"
+if [ -f "${home}/.claude/.core-install.json" ]; then
+  echo "PASS: lock 欠落でも後続のインストール記録まで進む"
+  pass=$((pass + 1))
+else
+  echo "FAIL: lock 欠落で後続処理が止まった"
+  fail=$((fail + 1))
+fi
+
+echo "=== ⑩: OS別 install hint ==="
+
+UNAME_STUB_BIN="${WORKDIR}/uname-stub-bin"
+mkdir -p "${UNAME_STUB_BIN}"
+cat > "${UNAME_STUB_BIN}/uname" <<'EOF'
+#!/bin/sh
+printf '%s\n' "${TEST_UNAME:-Darwin}"
+EOF
+chmod +x "${UNAME_STUB_BIN}/uname"
+
+hint_unknown="$(
+  INSTALL_SH_NO_MAIN=true TEST_UNAME=FreeBSD \
+    PATH="${UNAME_STUB_BIN}:${PATH}" INSTALL_PATH="${SCRIPT_DIR}/install.sh" \
+    "${BASH_BIN}" -c 'set --; source "$INSTALL_PATH"; install_hint_for git' 2>/dev/null
+)"
+if [ "${hint_unknown}" = "brew install git" ]; then
+  echo "PASS: 未知OSはdarwin hintへフォールバック"
+  pass=$((pass + 1))
+else
+  echo "FAIL: 未知OSのhint (actual=${hint_unknown})"
+  fail=$((fail + 1))
+fi
+
+hint_linux="$(
+  INSTALL_SH_NO_MAIN=true TEST_UNAME=Linux \
+    PATH="${UNAME_STUB_BIN}:${PATH}" INSTALL_PATH="${SCRIPT_DIR}/install.sh" \
+    "${BASH_BIN}" -c 'set --; source "$INSTALL_PATH"; install_hint_for git' 2>/dev/null
+)"
+if [ "${hint_linux}" = "sudo apt-get install git" ]; then
+  echo "PASS: Linuxはapt-get hintを返す"
+  pass=$((pass + 1))
+else
+  echo "FAIL: Linuxのhint (actual=${hint_linux})"
   fail=$((fail + 1))
 fi
 

@@ -12,7 +12,7 @@ set -uo pipefail
 
 # リポジトリルート（mkdocs.yml と docs/ がある場所）へ移動
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 DESIGN="docs/design"
 fail=0
@@ -82,12 +82,15 @@ done
 if command -v mkdocs >/dev/null 2>&1 && [ -f mkdocs.yml ]; then
   echo "🏗  mkdocs build --strict ..."
   tmpsite="$(mktemp -d)"
-  if ! mkdocs build --strict --site-dir "$tmpsite" >/tmp/mkdocs-check.log 2>&1; then
+  # 固定パス /tmp/mkdocs-check.log は複数プロセス同時実行での競合・
+  # スクラッチ領域への残置リークを招くため mktemp で都度発行する。
+  mkdocs_log="$(mktemp)"
+  if ! mkdocs build --strict --site-dir "$tmpsite" >"$mkdocs_log" 2>&1; then
     echo "❌ mkdocs build --strict が失敗しました（リンク切れ等）。詳細:"
-    tail -20 /tmp/mkdocs-check.log | sed 's/^/  /'
+    tail -20 "$mkdocs_log" | sed 's/^/  /'
     fail=1
   fi
-  rm -rf "$tmpsite"
+  rm -rf "$tmpsite" "$mkdocs_log"
 else
   echo "ℹ️  mkdocs 未導入のため strict ビルドはスキップ（軽量チェックのみ）。導入: pip install -r requirements-docs.txt"
 fi

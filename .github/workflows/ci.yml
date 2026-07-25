@@ -9,10 +9,17 @@ permissions:
   contents: read
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  test-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: show bash version (matrix leg premise)
+        run: bash --version | head -1
 
       # 各 .test.sh / selftest.sh は git user 設定を内部で都度 `git -C <tmp> config`
       # しており、uv 等の外部ランタイムにも依存しない（generators/build.py は
@@ -47,6 +54,15 @@ jobs:
       - name: backup-before-compact hook test
         run: bash hooks/backup-before-compact.test.sh
 
+      - name: json.sh lib smoke test
+        run: bash hooks/lib/json.test.sh
+
+      - name: settings-parity test
+        run: bash hooks/settings-parity.test.sh
+
+      - name: check-docs smoke test
+        run: bash scaffold/templates/scripts/check-docs.test.sh
+
       - name: evals harness selftest
         run: bash evals/harness-selftest.sh
 
@@ -58,6 +74,29 @@ jobs:
           git diff --exit-code dist/
           # git diff は未追跡ファイルを検出しないため、生成物の追加漏れは status で拾う
           test -z "$(git status --porcelain dist/)"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: shellcheck
+        run: |
+          shellcheck --version
+          git ls-files '*.sh' | xargs shellcheck -x -S warning
+          shellcheck -x -S warning bin/forge
+      - name: python bytecode check
+        run: python3 -m py_compile generators/build.py
+      - name: validate JSON configs
+        run: jq empty claude/settings.base.json installer/manifest.json dist/codex-plugin/plugin.json
+
+  # matrix の fan-in ゲート。ブランチ保護 ruleset の必須チェック名 `test` は
+  # matrix 化で `test (os)` に分裂して直接は満たせないため、全レーンを待ち受ける
+  # 単一ジョブとして `test` を残す（matrix + 必須チェックの標準パターン）。
+  test:
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "all matrix legs passed"
 
   gitleaks:
     runs-on: ubuntu-latest

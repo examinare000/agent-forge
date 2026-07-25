@@ -9,7 +9,6 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd -P)"
-REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd -P)"
 NEW_PROJECT_SH="${SCRIPT_DIR}/new-project.sh"
 BASH_BIN="/bin/bash"
 if [ ! -x "${BASH_BIN}" ]; then

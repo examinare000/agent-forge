@@ -34,7 +34,7 @@ assert_result() {
   stderr_file="$(mktemp "$TMP_ROOT/stderr-XXXXXX")"
 
   # テスト実行
-  cd "$work_dir"
+  cd "$work_dir" || exit 1
   bash generators/check-agent-blocks.sh >"$stdout_file" 2>"$stderr_file" || actual_code=$?
   actual_code=${actual_code:-0}
 
@@ -127,7 +127,7 @@ cp -R "$REPO_ROOT/generators" "$TEST_REPO_3/"
 python3 -c "import sys,io; p=sys.argv[1]; lines=[l for l in io.open(p,encoding='utf-8') if '**No-nesting**: サブエージェント' not in l]; io.open(p,'w',encoding='utf-8').writelines(lines)" "$TEST_REPO_3/agents/tdd-strict-coder.md"
 
 stderr_tmp="$(mktemp "$TMP_ROOT/stderr-verify-XXXXXX")"
-cd "$TEST_REPO_3"
+cd "$TEST_REPO_3" || exit 1
 bash generators/check-agent-blocks.sh >/dev/null 2>"$stderr_tmp" || true
 
 # stderr の内容を検証
@@ -172,7 +172,7 @@ cp -R "$REPO_ROOT/generators" "$TEST_REPO_5/"
 rm -rf "$TEST_REPO_5/generators/agent-blocks"
 
 stderr_tmp="$(mktemp "$TMP_ROOT/stderr-nodir-XXXXXX")"
-cd "$TEST_REPO_5"
+cd "$TEST_REPO_5" || exit 1
 bash generators/check-agent-blocks.sh >/dev/null 2>"$stderr_tmp" || actual_exit=$?
 actual_exit=${actual_exit:-0}
 
