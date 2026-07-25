@@ -6,7 +6,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/lint-after-edit.sh"
+            "command": "$HOME/.claude/hooks/lint-after-edit.sh",
+            "timeout": 30
           }
         ]
       }
@@ -17,7 +18,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/block-debug-log-residue.sh"
+            "command": "$HOME/.claude/hooks/block-debug-log-residue.sh",
+            "timeout": 15
           }
         ]
       }
@@ -28,7 +30,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "$HOME/.claude/hooks/backup-before-compact.sh"
+            "command": "$HOME/.claude/hooks/backup-before-compact.sh",
+            "timeout": 30
           }
         ]
       }
