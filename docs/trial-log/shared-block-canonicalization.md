@@ -35,3 +35,8 @@ agents/*.md に複製された共有ブロック（6/8 エージェントの報�
 - (iii) trial-log 書き手ロスターの整合確認範囲に rules/94 の書き手記述（L27）が漏れていた → rules/94 を転記方式に修正。1行参照の書式と完了報告ポインタ契約は rules/30 から削った際に受け皿が無かったため Skill trial-log へ移設。
 - (iv) tdd-strict-coder の Security 圧縮で resource bound が脱落 → 復元。
 - (v) リポジトリ直下の未追跡 `.claude/agents/`（8 ファイル）は eval ラッパーのプローブ実行時の生成物と特定し削除（`eval-against-checkout.md` 参照）。
+
+## クロスベンダーレビュー（Codex）指摘の処置（メイン転記）
+- 深刻度中 3 件を修正: testability-architect の trial-log 自書き義務（Write 非保持で実行不能）→ 読む義務 + 報告方式へ、check-agent-blocks.sh の空正準ファイル素通し・重複ブロック非検知 → 空チェック + 出現回数 ==1 検査へ、rules/30 と Skill の日付前置矛盾 → Skill 正本に統一。
+- 受容した既知の制約: dist/GEMINI.md はスキル索引のみ同梱（本文は配布元リポジトリ参照）という既存設計のため、rules/30 の詳細を Skill へ移した分だけ Gemini 単体プロジェクトからは書式詳細に到達しにくくなった。rules/30 に最低要件 4 点は残存しており、劣化ホスト向けの許容劣化と判断。スキル本文の GEMINI.md への同梱（build.py 拡張）は将来課題。
+- 低: check-agent-blocks の「バイト一致」表現は正確には「改行正規化後の一致」。実害なしとして受容。
