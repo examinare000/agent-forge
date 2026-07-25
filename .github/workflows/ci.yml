@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  test-matrix:
     strategy:
       fail-fast: false
       matrix:
@@ -88,6 +88,15 @@ jobs:
         run: python3 -m py_compile generators/build.py
       - name: validate JSON configs
         run: jq empty claude/settings.base.json installer/manifest.json dist/codex-plugin/plugin.json
+
+  # matrix の fan-in ゲート。ブランチ保護 ruleset の必須チェック名 `test` は
+  # matrix 化で `test (os)` に分裂して直接は満たせないため、全レーンを待ち受ける
+  # 単一ジョブとして `test` を残す（matrix + 必須チェックの標準パターン）。
+  test:
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "all matrix legs passed"
 
   gitleaks:
     runs-on: ubuntu-latest
