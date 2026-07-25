@@ -38,12 +38,12 @@ MAPPING = {
     "trial-log-worker.md": [
         "agents/tdd-strict-coder.md",
         "agents/implementation-coder.md",
-        "agents/testability-architect.md",
     ],
     "trial-log-reviewer.md": [
         "agents/code-reviewer.md",
         "agents/ai-antipattern-reviewer.md",
         "agents/adversarial-verifier.md",
+        "agents/testability-architect.md",
     ],
     "no-nesting.md": [
         "agents/adversarial-verifier.md",
