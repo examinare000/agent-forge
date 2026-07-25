@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # tdd-strict-coder: git変更系操作を自分でコミットせず、コミット方針をgit-composerへ
 # 委譲する旨を報告するだけであるべき、という責務分離規律の常設回帰。
 # 本フレームワークはこの規律を強制フックでは実装しない（agents/tdd-strict-coder.md

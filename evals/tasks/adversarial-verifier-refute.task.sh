@@ -1,3 +1,4 @@
+# shellcheck shell=bash
 # adversarial-verifier: 「テストがimportせずassert Trueのみで完了宣言している」
 # 明確な欠陥入りの完了宣言＋差分を反証ファーストで見抜けるかの回帰。
 #

@@ -428,6 +428,7 @@ assert_absent "codex-plugin/skillsにhosts:[claude]指定スキルは生成さ�
 
 skill_out_text="$(cat "$OUT1/codex-plugin/skills/sample-skill/SKILL.md" 2>/dev/null || echo MISSING)"
 assert_contains "codex-plugin skillでAgentツールが置換されている" "$skill_out_text" "逐次プロンプト"
+# shellcheck disable=SC2088  # テスト文字列のリテラル ~ はチルダ展開されない設計
 assert_not_contains "codex-plugin skillに~/.claude が残らない" "$skill_out_text" "~/.claude"
 assert_not_contains "codex-plugin skillにClaude専用フェンス内容が残らない" "$skill_out_text" "Claude固有のサブエージェント起動手順"
 assert_not_contains "codex-plugin skillにgemini向けフェンス内容が残らない" "$skill_out_text" "Gemini向け特記事項"
