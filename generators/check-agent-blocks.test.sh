@@ -213,6 +213,24 @@ assert_result "正準ファイルが空だと exit 1" \
   "report-core.md: 正準ファイルが空"
 
 # ============================================================
+# テスト6B: 正準ファイルが改行のみだと exit 1
+# ============================================================
+# rstrip 後に空文字列となる改行のみケースの回帰テスト
+TEST_REPO_6B="$TMP_ROOT/test-repo-6b"
+mkdir -p "$TEST_REPO_6B"
+cp -R "$REPO_ROOT/agents" "$TEST_REPO_6B/"
+cp -R "$REPO_ROOT/skills" "$TEST_REPO_6B/"
+cp -R "$REPO_ROOT/generators" "$TEST_REPO_6B/"
+
+# report-core.md を改行のみにする
+printf '\n' > "$TEST_REPO_6B/generators/agent-blocks/report-core.md"
+
+assert_result "正準ファイルが改行のみだと exit 1" \
+  1 "$TEST_REPO_6B" \
+  "" \
+  "report-core.md: 正準ファイルが空"
+
+# ============================================================
 # テスト7: 対象内にブロックが重複していると exit 1
 # ============================================================
 TEST_REPO_7="$TMP_ROOT/test-repo-7"
