@@ -99,6 +99,7 @@ v0.5.0 リリース済み
 | `agents/` | サブエージェント定義 8 本（architect / coder×2 / reviewer×2 / verifier / test-runner / git-composer） |
 | `hooks/` | 編集・停止ゲート（lint-after-edit・block-debug-log-residue・backup-before-compact、各 .test.sh 付き） |
 | `evals/` | 回帰テスト（golden tasks。手動実行専用） |
+| `docs/` | 運用文書（`docs/adr/` の ADR・`docs/trial-log/` の試行記録） |
 | `claude/` | Claude Code 用設定（CLAUDE.core.md・settings.base.json） |
 | `installer/` | インストール関連（install.sh・manifest.json 等） |
 | `scaffold/` | 新規プロジェクト雛形生成（new-project.sh・templates/） |

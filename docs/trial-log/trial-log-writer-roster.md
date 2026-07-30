@@ -24,3 +24,36 @@ skills/trial-log と rules/30 が書き手に指定するエージェント集�
 ## adversarial-verifier 再検証 PASS 時の補足（メイン転記）
 - 「ワーカーの報告契約は5項目」という語は導入コミット由来の経過的な念押しで、本リポジトリ内に定義実体が存在しなかったことを `git log -S` で確認。今後この語を正本として参照しない（実効的な出力契約は CLAUDE.core.md の「ワーカー出力契約」）。
 - 残存リスクとして受容: check-agent-blocks.test.sh は期待文字列 `6 blocks × 24 targets OK` をハードコードしており、ブロック・対象を増やす際はテスト更新が必須。
+
+## 追記 2026-07-30（事後補完）
+
+### frontmatter tools の実地確認
+agents/*.md 全8ファイルの frontmatter tools を確認（`grep -n "^tools:" agents/*.md`）:
+```
+agents/adversarial-verifier.md:6:tools: Bash, Read, Grep, Glob
+agents/code-reviewer.md:8:tools: Bash, Read, Grep, Glob
+agents/ai-antipattern-reviewer.md:7:tools: Bash, Read, Grep, Glob
+agents/git-composer.md:8:tools: Bash, Read, Grep, Glob, Edit, Write
+agents/testability-architect.md:8:tools: Bash, Read, Grep, Glob, Skill, TodoWrite, WebSearch, WebFetch, mcp__shelf__consult, mcp__shelf__list_notebooks
+agents/implementation-coder.md:8:tools: Bash, Read, Grep, Glob, Edit, Write, Skill, TodoWrite
+agents/tdd-strict-coder.md:8:tools: Bash, Read, Grep, Glob, Edit, Write, Skill, TodoWrite
+agents/test-runner.md:8:tools: Bash, Read, Grep, Glob
+```
+Write/Edit を持つエージェント: git-composer / implementation-coder / tdd-strict-coder。read-only 群（adversarial-verifier / code-reviewer / ai-antipattern-reviewer / testability-architect / test-runner）は構成通り。
+
+### check-agent-blocks.sh の実地検証
+```
+$ bash generators/check-agent-blocks.sh
+agent-blocks: 6 blocks × 24 targets OK
+```
+OK 出力を確認。テスト期待値が現行構成に合致している。
+
+### git log -S での確認
+```
+$ git log -S "ワーカーの報告契約は5項目" --oneline
+8ef7f58 rules/agents/skillsの変更をdist配布物へ再生成同期
+a3564c8 本リポジトリ自身でtrial-log/ADR運用を開始し、正準ブロック方式と書き手ロスターの決定を記録
+3edc8fb trial-log・モデルピン・エージェント一覧の正準を一本化し重複記述をポインタ化
+1b441d0 試行と棄却理由をlive-docsとして記録し、繰り返し失敗と棄却案の再試行を防ぐためtrial-logスキルを同梱
+```
+該当語は導入コミット `1b441d0` 由来の経過的表現であることを確認。現状では rules/94-self-improvement-protocol.md（「ワーカー出力契約」欄の 5 項目）が実効的な定義である。

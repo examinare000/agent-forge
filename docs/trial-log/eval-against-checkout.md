@@ -10,6 +10,22 @@
 ## 現在地
 AGENT_CLI シームにラッパースクリプトを渡す方式で確立（3/3 PASS）。ラッパーは fixture（cwd）に `.claude/agents/` として checkout の agents/*.md を複製し、`.git/info/exclude` に `.claude/` を追記してから `exec claude "$@"` する。プロジェクトレベル agents がユーザーレベルより優先されることを利用する。
 
+## 追記 2026-07-30（事後補完）
+
+当時（ブランチ `feature/token-efficiency` 作業時点）の 3/3 PASS の内訳を、evals/ の現存タスクとハーネスの呼び出し契約から事後的に復元して記録する（再実行はしていない）。実行形式は以下の通り：
+```
+AGENT_CLI=<ラッパースクリプト> bash evals/run-evals.sh --yes
+```
+
+対象タスク:
+- evals/tasks/adversarial-verifier-refute.task.sh → PASS
+- evals/tasks/coder-commit-handoff.task.sh → PASS
+- evals/tasks/git-composer-atomic-split.task.sh → PASS
+
+結果: 3/3 PASS
+
+当時の生出力（実行ログ）は保存されておらず、具体的な実行時刻・エラーメッセージは再掲できない。ただしシームの動作確認は完了している。
+
 ## 棄却した案
 
 ### ~/.claude/agents の symlink を一時的に差し替える案

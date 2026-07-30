@@ -8,7 +8,7 @@
 agents/*.md に複製された共有ブロック（6/8 エージェントの報告規範ほか）の文言ドリフトを防ぎつつ、トークン量を削減する。
 
 ## 現在地
-実装完了。`generators/check-agent-blocks.sh`（新規）が 6 ブロック × 24 対象ファイルのバイト一致包含を検査し、CI（`.github/workflows/ci.yml`）の generators selftest 直後に組み込み済み。agents/*.md 8 ファイル・skills/review-ai-antipattern/SKILL.md・skills/trial-log/SKILL.md への埋め込みと重複圧縮を実施し、`python3 generators/build.py` / `bash generators/selftest.sh` とも Green を確認済み。
+実装完了。`generators/check-agent-blocks.sh`（新規）が 6 ブロック × 24 参照箇所（検査対象ファイル 9 個。埋め込み先としてはこれに加え、単独ブロックのため検査対象外の skills/trial-log/SKILL.md がある）のバイト一致包含を検査し、CI（`.github/workflows/ci.yml`）の generators selftest 直後に組み込み済み。agents/*.md 8 ファイル・skills/review-ai-antipattern/SKILL.md・skills/trial-log/SKILL.md への埋め込みと重複圧縮を実施し、`python3 generators/build.py` / `bash generators/selftest.sh` とも Green を確認済み。
 
 ## 棄却した案
 
