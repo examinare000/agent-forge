@@ -315,12 +315,16 @@ echo "----"
 # jq/python3 フォールバック（PATH 制限で再現）
 # =========================================================================
 # 除外したいコマンド以外を実バイナリへのシンボリックリンクとして集めた
-# ディレクトリに PATH を丸ごと差し替える。本 hook は stdin を読むために
-# cat を要する。
+# ディレクトリに PATH を丸ごと差し替える。本 hook は stdin 読取に cat、
+# HOOK_DIR 解決に dirname（symlink 経路では readlink）を要する。cat のみ
+# だと dirname 不在で HOOK_DIR 解決自体が壊れ、意図した json_tools_available
+# 分岐より手前で落ちてしまう。
 NO_JQ_NO_PY3_PATH="$TMP_ROOT/no-jq-no-py3-bin"
 mkdir -p "$NO_JQ_NO_PY3_PATH"
-_cat_src="$(command -v cat 2>/dev/null)"
-[ -n "$_cat_src" ] && ln -s "$_cat_src" "$NO_JQ_NO_PY3_PATH/cat"
+for _stub_cmd in cat dirname readlink; do
+  _stub_src="$(command -v "$_stub_cmd" 2>/dev/null)"
+  [ -n "$_stub_src" ] && ln -s "$_stub_src" "$NO_JQ_NO_PY3_PATH/$_stub_cmd"
+done
 
 # json_payload 自体が python3 に依存するため、jq/python3 不在ケースの JSON は
 # ここだけ手組みで用意する（デバッグ対象がフック側であり、生成側に外部

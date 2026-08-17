@@ -54,6 +54,9 @@ jobs:
       - name: backup-before-compact hook test
         run: bash hooks/backup-before-compact.test.sh
 
+      - name: approve-safe-rm hook test
+        run: bash hooks/approve-safe-rm.test.sh
+
       - name: json.sh lib smoke test
         run: bash hooks/lib/json.test.sh
 

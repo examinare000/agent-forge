@@ -71,6 +71,15 @@ agent_type="$(json_field "$input" agent_type)"
 
 cmd="$(json_field "$input" 'tool_input.command')"
 
+# 早期打ち切り: allow はどのセグメントも rm 語を含むことを要求するため、
+# コマンド文字列に rm が現れない時点で判定は確定（素通し）する。逐文字走査
+# （split_command/build_argv_words）はコマンド長に対して線形以上のコストが
+# かかるため、対象外コマンドで無駄な走査を避ける。
+case "$cmd" in
+  *rm*) : ;;
+  *) exit 0 ;;
+esac
+
 # split_command: コマンド文字列を先頭から1文字ずつ走査し、クォート状態
 # （none/single/double）を追跡しながら、
 #   - unquoted のリダイレクト（> <）・バッククォート・$( を検出したら
