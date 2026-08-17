@@ -6,6 +6,9 @@
 
 ## [未リリース]
 
+### Added
+- `hooks/approve-safe-rm.sh`: 既知の安全な `rm -rf`（ビルドキャッシュ whitelist・自セッション scratchpad）のみを自動承認する PreToolUse(Bash) hook。姉妹の private リポジトリで反証検証6ラウンドを経て確定した設計を移植（ADR-004）
+
 ## [0.5.0] - 2026-07-25
 
 ### Added
