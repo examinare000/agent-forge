@@ -3,7 +3,7 @@
 ## 単一更新点（モデル ID をリテラルで持つ実体）
 改名・世代交代時はここだけを更新する。
 
-1. Claude モデル対応表（`rules/02-model-fallback-matrix.md`。ホスト別マッピングを `rules/hosts/claude/` に分離している構成では、そちらの `02-model-fallback-matrix.md` の「ティア ↔ Claude モデル対応表」）
+1. Claude モデル対応表（`rules/02-model-fallback-matrix.md` の host:claude フェンス内の表）
 2. `agents/*.md` の frontmatter `model:` は `opus|sonnet|haiku` のエイリアス指定のみ。ID を直書きしないので世代交代の更新対象外
 3. `dist/codex-agents/*.toml` のコメント内のモデル表現は `generators/build.py` の生成物。手編集せず、`agents/*.md` を直したうえで `python3 generators/build.py` で再生成する
 4. `~/.codex/config.toml` の `model`（Codex 利用時のみ。Codex Main と、model 未指定の外部起動の既定。native SubAgent のモデルとは分離する）
@@ -21,7 +21,7 @@
 - 例: gpt-6.1-sol / medium は中位なので Tier B 相当。native の許可済み Git・中継にも使えるが、敵対的検証には足りない。gpt-6.1-sol / high は Tier A 相当となり、第3票（adversarial-review）を担える。
 
 ## エージェントピンの降格手順（最終手段。opus が完全不在の時のみ）
-正本は `rules/hosts/claude/02-model-fallback-matrix.md`「降格手順」。クロスベンダー最上位ティアを read-only の代替検証役に充てられない場合に限り、検証役のピンを下げる。
+要求水準の正本は `rules/02-model-fallback-matrix.md`「格下げの順序（検証役は最後まで守る）」。クロスベンダー最上位ティアを read-only の代替検証役に充てられない場合に限り、検証役のピンを下げる。
 
 ```bash
 # 対象: ~/.claude/agents/ の frontmatter model 行のみ（sed -i '' は BSD/macOS 構文。Linux では sed -i）

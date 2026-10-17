@@ -15,6 +15,8 @@
 # 注記: 「フック整合」節（旧・個人engineering規約のgit戦略ルールが host:claude フェンスで
 # 持っていた節）を死リンク化していた置換規則群は、rules 再スコープでその git 戦略ルール
 # 自体が削除されたことに伴い対象そのものが消滅したため削除した。
+# rules/hosts/claude/ 配下への参照を劣化ガイダンスへ倒していた置換規則は、02/91/92 を
+# top-level へ移して参照が消滅したため削除した（死文化していた）。
 # generators/testdata/fixture-basic はこれらに依存していなかったため
 # （`grep -rn フック整合 generators/testdata/` で無依存を確認済み）、維持せず削除する判断とした。
 
@@ -28,13 +30,6 @@ gemini = "shelf MCP（導入環境のみ。未導入なら省略）"
 pattern = 'mcp__[A-Za-z0-9_]+'
 codex = "対応 MCP ツール（導入環境のみ。未導入なら省略）"
 gemini = "対応 MCP ツール（導入環境のみ。未導入なら省略）"
-
-[[substitution]]
-# rules/hosts/claude/ 配下は位置により生成物から除外されるファイルなので、
-# それらへの参照は「本ファイル該当節」ではなく劣化ガイダンス参照に倒す。
-pattern = '~/\.claude/rules/hosts/claude/[\w\-./]+\.md'
-codex = "本ファイル該当節（劣化ガイダンス参照）"
-gemini = "本ファイル該当節（劣化ガイダンス参照）"
 
 [[substitution]]
 # reference/ は rules/ の外に置かれ dist に入らない配布物なので、AGENTS.md / GEMINI.md

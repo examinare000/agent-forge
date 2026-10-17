@@ -94,7 +94,7 @@ v0.5.0 リリース済み
 | ディレクトリ | 役割 |
 |---|---|
 | `bin/` | 統一CLI（`forge` — install/new/check の薄いディスパッチャ） |
-| `rules/` | 規範・戦略ドキュメント（番号レイヤ制。10-29・70-89 は採用者が追加する意図的な空き番帯。`hosts/claude/` に Claude 固有規範） |
+| `rules/` | 規範・戦略ドキュメント（番号レイヤ制。10-29・70-89 は採用者が追加する意図的な空き番帯。手順・例示は `reference/` に置く） |
 | `skills/` | 手続きスキル（deep-reasoning・plan-deep-research・review-ai-antipattern・trial-log・dual-track-proposals・baseline-ui・frontend-design） |
 | `reference/` | 参照資料（ルールの補足。掃引の死角・教訓昇格の基盤・モデルID更新点・委譲経路の実体。`rules/` の外に置くため `dist/` には入らず、`forge install` で `~/.claude/reference` へ symlink） |
 | `agents/` | サブエージェント定義 8 本（architect / coder×2 / reviewer×2 / verifier / test-runner / git-composer） |
