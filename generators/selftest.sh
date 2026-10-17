@@ -265,7 +265,7 @@ echo ""
 echo "=== 単体: 本番 hosts.toml の個別置換規則 ==="
 # 以降は fixture ではなく本番の generators/hosts.toml を読む。置換規則の追加・順序変更が
 # 意図どおり効くか（特に汎用 ~/.claude 置換に先に消費されないか）を固定するため。
-assert_py "~/.claude/reference/<name>.md は配布元リポジトリの reference/<name>.md 案内になる(codex/gemini)" "
+assert_py "reference 引用（~/.claude/reference/<name>.md）は配布元リポジトリの reference/<name>.md 案内になる(codex/gemini)" "
 $PY_IMPORT_BUILD
 from pathlib import Path
 subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))

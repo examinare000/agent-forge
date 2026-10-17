@@ -36,6 +36,12 @@ jobs:
       - name: check-agent-blocks selftest
         run: bash generators/check-agent-blocks.test.sh
 
+      - name: private refs check
+        run: bash generators/check-private-refs.sh
+
+      - name: check-private-refs selftest
+        run: bash generators/check-private-refs.test.sh
+
       - name: scaffold new-project smoke test
         run: bash scaffold/new-project.test.sh
 
