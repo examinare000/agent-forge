@@ -269,10 +269,10 @@ assert_py "reference 引用（~/.claude/reference/<name>.md）は配布元リポ
 $PY_IMPORT_BUILD
 from pathlib import Path
 subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
-src = '詳細は ~/.claude/reference/lesson-promotion.md を参照'
+src = '詳細は \`~/.claude/reference/lesson-promotion.md\` を参照'
 for host in ('codex', 'gemini'):
     out = build.apply_substitutions(src, host, subs)
-    assert out == '詳細は 配布元リポジトリの \`reference/lesson-promotion.md\` を参照', (host, out)
+    assert out == '詳細は \`reference/lesson-promotion.md\`（配布元リポジトリ） を参照', (host, out)
 print('OK')
 "
 
@@ -283,7 +283,7 @@ subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
 for host in ('codex', 'gemini'):
     out = build.apply_substitutions('追送は SendMessage で行う', host, subs)
     assert 'SendMessage' not in out, (host, out)
-    assert '同一ワーカーへの追送機構' in out, (host, out)
+    assert '追送機構（存在する場合）' in out, (host, out)
 print('OK')
 "
 
@@ -294,7 +294,7 @@ subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
 for host in ('codex', 'gemini'):
     out = build.apply_substitutions('\`maxTurns\` を超えたら停止', host, subs)
     assert 'maxTurns' not in out, (host, out)
-    assert out == 'ターン上限 を超えたら停止', (host, out)
+    assert out == 'ターン上限を超えたら停止', (host, out)
 print('OK')
 "
 

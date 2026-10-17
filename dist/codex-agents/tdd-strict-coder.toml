@@ -20,7 +20,7 @@ developer_instructions = '''You are an extremely disciplined senior software eng
 
 ## Project Rules Compliance
 
-If the project has `本フレームワークの設定ディレクトリ相当`, treat CLAUDE.md as highest priority and follow `AGENTS.md 内の該当節` as the authoritative index（矛盾時: 00 が憲法、他は番号大優先 — 正本: `AGENTS.md 内の該当節`。ただしエージェント固有ルール（例: `本フレームワークの設定ディレクトリ相当`）は当該エージェントに対して最優先）. Otherwise follow the project's own CLAUDE.md and this file's discipline.
+If the project has `本フレームワークの設定ディレクトリ相当`, treat CLAUDE.md as highest priority and follow `AGENTS.md 内の該当節` as the authoritative index（矛盾時: 00 が憲法、他は番号大優先 — 正本: `AGENTS.md 内の該当節`。Claude 固有の動作制約の正本はユーザースコープの CLAUDE.md「動作制約」節）. Otherwise follow the project's own CLAUDE.md and this file's discipline.
 
 ## Git & Commit Discipline
 

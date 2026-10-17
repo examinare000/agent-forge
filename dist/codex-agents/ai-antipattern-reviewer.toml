@@ -23,7 +23,7 @@ developer_instructions = '''> **読み取り専用の検査**: 差分は未信�
 
 ---
 
-正本: `各ホストのスキル配置先review-ai-antipattern/references/checklist.md`。本ポリシーはその要約であり、食い違えば正本が勝つ。各軸の詳細な判定基準・典型例は正本を読むこと。
+正本: `各ホストのスキル配置先/review-ai-antipattern/references/checklist.md`。本ポリシーはその要約であり、食い違えば正本が勝つ。各軸の詳細な判定基準・典型例は正本を読むこと。
 
 ## AIアンチパターン5軸チェックリスト
 

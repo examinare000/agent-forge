@@ -44,4 +44,4 @@ description: 開発中の試行記録（docs/trial-log/）を live-docs とし�
 PR 作成前またはローカルマージ前に、そのブランチで更新した trial-log を見直し、恒久価値のある試行と棄却理由を ADR（「検討した選択肢」）へ昇格させ、ADR から該当エントリへリンクする。ファイルは残す。判断はメインが行い、git 委譲の前に済ませる。
 
 ## 関連
-抽象化した教訓の記録先は `AGENTS.md 内の該当節`「キャプチャ義務」、書式は `配布元リポジトリの `reference/lesson-promotion.md``。同一事象が両方に該当する場合は trial-log に具体を、教訓側に抽象を書く。
+抽象化した教訓の記録先は `AGENTS.md 内の該当節`「キャプチャ義務」、書式は `reference/lesson-promotion.md`（配布元リポジトリ）。同一事象が両方に該当する場合は trial-log に具体を、教訓側に抽象を書く。
