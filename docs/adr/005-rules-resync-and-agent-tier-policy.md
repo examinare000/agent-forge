@@ -27,6 +27,29 @@ README は dist から除外され、また置換による誤変換を受けう�
 - `memory: user` を外す。エージェントが個別に永続メモリを持つ構成をやめ、観察はオーケストレーターへ返して一元的に扱う。
 - `maxTurns` でターン予算を明示する（12〜25）。
 
+8 エージェントの変更（model / effort / maxTurns。旧は全員 `memory: user`・maxTurns なし）:
+
+| エージェント | 旧 | 新 |
+|---|---|---|
+| adversarial-verifier | opus / xhigh | opus / high / 20 |
+| ai-antipattern-reviewer | sonnet / high | sonnet / high / 20 |
+| code-reviewer | sonnet / xhigh | sonnet / high / 20 |
+| git-composer | sonnet / medium | sonnet / medium / 25 |
+| implementation-coder | haiku / low | sonnet / medium / 20 |
+| tdd-strict-coder | sonnet / high | sonnet / high / 20 |
+| test-runner | haiku / low | haiku / low / 12 |
+| testability-architect | opus / xhigh | opus / high / 20 |
+
+新: `memory` は全員削除。
+
+### (e) 00（憲法）の文言変更
+- 原則 3 は姉妹リポジトリの TDD 版にせず、forge 旧来の「検証をもって完了とする」に据え置く。TDD は採用者が 10〜29 番帯に置く個人嗜好として、forge の核に含めない方針と整合させるため。
+- 原則 1 は姉妹リポジトリの「ロールバックしてよい（fix-forward 可）」に追従する。
+- 優先度行の「変更禁止」を「改訂はユーザー承認と PR 経由」に改める。
+
+### (f) 94 の教訓保存
+教訓の保存先を `~/.claude/lessons/inbox/` とし、昇格の自動適用は採用者の明示許可がある場合に限る。
+
 ### ADR-003 との関係
 ADR-003（クロスベンダー最上位ティアを Tier A 同格の判断役として扱う）は変更しない。検証者の独立性（read-only・名指しゲート）と検証役の Tier A ピンは維持する。変わるのは、検証役に暗黙に求めていた「最大 effort」を「Tier A + ロール別 effort 下限（high）」の要件に置き換える点のみである。
 
@@ -37,5 +60,5 @@ effort を最大にしても検証の独立性や反証の質は比例して上�
 ## 結果
 
 - `rules/02` のピン表に effort と maxTurns の列を追加し、`implementation-coder` を Tier B へ更新した。
-- `agents/*.md` の frontmatter は別作業で本方針に合わせる。
+- `agents/*.md` の frontmatter は本 PR で本方針に合わせて適用済み。
 - 出所は姉妹の private リポジトリでの 2026-09〜10 の運用実証であり、本リポジトリ固有の再実測は未実施。

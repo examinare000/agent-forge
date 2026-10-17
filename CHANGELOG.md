@@ -26,6 +26,9 @@
 - 正準ブロック `trial-log-reviewer` を追記（`trial-report` と対）
 - `antipattern-axes` ブロックの検査対象を `references/checklist.md` へ移動
 - `hosts.toml` の `Fable` 置換先を Tier S モデルへ変更
+- `rules/00`: 原則 3 は「検証をもって完了とする」に据え置き（TDD は採用者の個人嗜好として核に含めない）、原則 1 は「ロールバックしてよい（fix-forward 可）」に追従、優先度行は「改訂はユーザー承認と PR 経由」に変更（ADR-005 (e)）
+- `rules/94`: 教訓の保存先を `~/.claude/lessons/inbox/` とし、昇格の自動適用は採用者の明示許可時のみとした（ADR-005 (f)）
+- `installer/manifest.json` に `reference` の symlink entry を追加し、`README.md`・`CONTRIBUTING.md` を更新
 
 ### Removed
 - `rules/hosts/claude/*`（01/02/91/92）。内容は top-level の rule と `CLAUDE.core.md` に統合済み
