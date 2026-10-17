@@ -4,12 +4,12 @@
 - **別ベンダーの実装役**（選定表 行3）: `codex:codex-rescue`（`/codex:rescue`）。純粋なフォワーダ — Codex を実行するが検証もコミットもしない。戻ったらオーケストレーターがゲートを所有する: `test-execution` ロールで検証 → 差分レビュー → `git-compose` ロールでコミット。Codex 主導のコードレビューは `/codex:review`。
   - **model は指定しない**（単一更新点。ユーザーが明示した時のみ `--model`）。**effort はロール駆動で明示する**（下限は `02-model-fallback-matrix.md`「Codex 側のモデル解決」）。`codex-rescue` を必須ゲートの起動経路にはしない。
   - **ブリーフは operator 式で書く**: 1 run 1 タスク、done の定義を明示、read-only は task text に明記する（フラグではなくフォワーダの判断で `--write` が付くため）。reasoning を上げる代わりに検証ループと出力契約をブリーフに書く。詳細はプラグイン同梱の `gpt-5-4-prompting` スキル。
-- **大コンテキスト委譲役**（行4）: `antigravity-delegate`。無ければ `.mcp.json` の gemini-cli MCP。
-- Antigravity をメインとする環境での実体は `GEMINI.md` の固有節が持つ。
+- **大コンテキスト委譲役**（行4）: 導入環境に当該 provider があれば、その大コンテキスト委譲機構（無ければ `.mcp.json` の対応 MCP）。
+- 当該 provider をメインとする環境では、その環境の固有指示が実体を持つ。
 
 ## Codex native の起動と役割境界
 
-- Main は全体判断と分解を担当し、SubAgent には独立して検証できる小さな仕事を渡す。役割とモデル・effort の許可範囲は `02-model-fallback-matrix.md`「Codex 側のモデル解決」を正とする。既定 agent への無指定起動で Main の設定を継承させず、profile を持つ役割を選ぶ。
+- Main は全体判断と分解を担当し、SubAgent には独立して検証できる小さな仕事を渡す。モデル・effort の許可範囲は `02-model-fallback-matrix.md`「Codex 側のモデル解決」の解決規則に従い、役割は以下の一般表で選ぶ。既定 agent への無指定起動で Main の設定を継承させず、profile を持つ役割を選ぶ。
 - `collaboration.spawn_agent` を使う環境では、独立レビューを `fork_turns="none"` で起動する。実装・調査も自己完結ブリーフで足りる場合は履歴を継承しない。利用機構に同等の選択肢がなければ、別の新規セッションで独立文脈を確保し、その方法を報告する。
 - custom agent の model / effort は起動時指定より優先するため、役割の設定と異なる値を指定しただけで変更済みと主張しない。変更後の実効値は新規セッションで確認する。
 - Codex への native 委譲を通常の経路とする。MCP 中継は利用可能なツールを確認し、固定された ToolSearch・Read・Edit 等の名前を前提にしない。

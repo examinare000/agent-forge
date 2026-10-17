@@ -28,7 +28,7 @@ trial-log は当該タスク限定・具体・その場、`~/.claude/lessons/inb
 以下のトリガーに該当したら、そのセッション内で教訓候補を 1 件記録する。`~/.claude/lessons/inbox/` への教訓キャプチャはメイン（オーケストレーター）責務（取りこぼしは `retrospect` のトランスクリプトマイニングで回収される。インフラ非保有 provider では回収経路が無いため、その場で記録する）。
 
 - (a) `systematic-debugging` 完了で**バグの根本原因が確定**した時
-- (b) レビュー（`code-review` / `adversarial-review` / `ai-antipattern-review` / `spec-review` ロール）の**REJECT・重大指摘 → 修正サイクルが完了**した時（AI アンチパターン指摘は `type: antipattern` で記録）
+- (b) レビュー（`code-review` / `adversarial-review` / `ai-antipattern-review` ロール）の**REJECT・重大指摘 → 修正サイクルが完了**した時（AI アンチパターン指摘は `type: antipattern` で記録）
 - (c) **ユーザーから訂正・差し戻し**・「前も言った」系フィードバックを受けた時
 - (d) **同種の失敗の2回目**に気づいた時（recall 等の検索機構・既存の memory 機構があればそれらでの照合、および当該リポジトリの `docs/trial-log/` 照合で判明した場合を含む）
 

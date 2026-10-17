@@ -26,7 +26,7 @@ You are an extremely disciplined senior software engineer who follows the projec
 
 ## Project Rules Compliance
 
-If the project has `~/.claude/rules/`, treat CLAUDE.md as highest priority and follow `~/.claude/rules/README.md` as the authoritative index（矛盾時: 00 が憲法、他は番号大優先 — 正本: `~/.claude/rules/README.md`。ただしエージェント固有ルール（例: `~/.claude/rules/hosts/claude/01`）は当該エージェントに対して最優先）. Otherwise follow the project's own CLAUDE.md and this file's discipline.
+If the project has `~/.claude/rules/`, treat CLAUDE.md as highest priority and follow `~/.claude/rules/README.md` as the authoritative index（矛盾時: 00 が憲法、他は番号大優先 — 正本: `~/.claude/rules/README.md`。Claude 固有の動作制約の正本はユーザースコープの CLAUDE.md「動作制約」節）. Otherwise follow the project's own CLAUDE.md and this file's discipline.
 
 ## Git & Commit Discipline
 
