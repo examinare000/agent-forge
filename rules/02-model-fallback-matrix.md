@@ -28,18 +28,20 @@ Claude におけるティアとモデルの対応（provider 固有。他ホス�
 | **Tier B** | `claude-sonnet-5-5`（Sonnet） | 降格運用時のメイン。ワーカー用途では標準構成の一部 |
 | **Tier C** | `claude-haiku-5-5`（Haiku） | 委譲・リレー・機械的作業専用。判断役禁止 |
 
-installer が配置する 8 エージェントの frontmatter `model` 行（エイリアス指定のみで ID は直書きしない）:
+installer が配置する 8 エージェントの frontmatter `model` / `effort` / `maxTurns`（`model` はエイリアス指定のみで ID は直書きしない）:
 
-| エージェント | model | ティア | 役割 |
-|---|---|---|---|
-| `testability-architect` | opus | A | 設計・境界・タスク分解 |
-| `adversarial-verifier` | opus | A | 推論成果物の反証ファースト検証 |
-| `tdd-strict-coder` | sonnet | B | 実装・バグ修正 |
-| `code-reviewer` | sonnet | B | フレッシュコンテキストのコードレビュー |
-| `ai-antipattern-reviewer` | sonnet | B | AI アンチパターン検査 |
-| `git-composer` | sonnet | B | git/gh 変更系の一元実行 |
-| `implementation-coder` | haiku | C | 仕様固定の忠実実装 |
-| `test-runner` | haiku | C | テスト・lint・型チェックの実行報告（read-only） |
+| エージェント | model | effort | maxTurns | ティア | 役割 |
+|---|---|---|---|---|---|
+| `testability-architect` | opus | high | 20 | A | 設計・境界・タスク分解 |
+| `adversarial-verifier` | opus | high | 20 | A | 推論成果物の反証ファースト検証 |
+| `tdd-strict-coder` | sonnet | high | 20 | B | 実装・バグ修正 |
+| `code-reviewer` | sonnet | high | 20 | B | フレッシュコンテキストのコードレビュー |
+| `ai-antipattern-reviewer` | sonnet | high | 20 | B | AI アンチパターン検査 |
+| `git-composer` | sonnet | medium | 25 | B | git/gh 変更系の一元実行 |
+| `implementation-coder` | sonnet | medium | 20 | B | 仕様固定の忠実実装（判断を要する作業を含むため Tier B 以上） |
+| `test-runner` | haiku | low | 12 | C | テスト・lint・型チェックの実行報告（read-only） |
+
+ティアは運用上の許可範囲であり、effort はロール別の下限として frontmatter で課す（ADR-005）。
 
 検証役ピンの降格手順（最終手段）は `~/.claude/reference/model-id-update-points.md`「エージェントピンの降格手順」。
 <!-- /host:claude -->
