@@ -193,6 +193,45 @@ print('OK')
 "
 
 echo ""
+echo "=== 単体: strip_host_fences の現仕様固定(除去されないケース) ==="
+# 以下は「望ましい挙動」ではなく build.py の現仕様の文書化。FENCE_RE は \n 終端の
+# 行頭寄り記法だけを想定しているため、下記の書き方では漏れる/壊れる。変更時は
+# 実リポジトリ節のフェンス漏れ検出(dist に host:claude が残らないこと)が最終防衛線。
+assert_py "リスト項目の行末に書いた単独の開きマーカー(閉じ無し)は除去されずdistへ漏れる" "
+$PY_IMPORT_BUILD
+text = '- 項目 <!-- host:claude -->\n- 次の項目\n'
+out = build.strip_host_fences(text, 'codex')
+assert out == text, repr(out)
+assert 'host:claude' in out, repr(out)
+print('OK')
+"
+
+assert_py "マーカー直後に空白がある(\\nで終わらない)フェンスは除去されない" "
+$PY_IMPORT_BUILD
+text = 'a\n<!-- host:claude --> \ndrop\n<!-- /host:claude -->\nb\n'
+out = build.strip_host_fences(text, 'codex')
+assert out == text, repr(out)
+print('OK')
+"
+
+assert_py "CRLF行末のフェンスは除去されない(中身もマーカーも残る)" "
+$PY_IMPORT_BUILD
+text = 'a\r\n<!-- host:claude -->\r\ndrop\r\n<!-- /host:claude -->\r\nb\r\n'
+out = build.strip_host_fences(text, 'codex')
+assert out == text, repr(out)
+assert 'drop' in out and 'host:claude' in out, repr(out)
+print('OK')
+"
+
+assert_py "リスト項目の行末で開き閉じが揃うと行頭を保たず直前行テキストと後続行が連結して壊れる" "
+$PY_IMPORT_BUILD
+text = '- 項目 <!-- host:claude -->\n- claude専用\n<!-- /host:claude -->\nafter\n'
+out = build.strip_host_fences(text, 'codex')
+assert out == '- 項目after\n', repr(out)
+print('OK')
+"
+
+echo ""
 echo "=== 単体: 置換テーブル読み込み・適用 ==="
 assert_py "hosts.tomlの最小サブセットをパースできる(pattern/codex/gemini)" "
 $PY_IMPORT_BUILD
@@ -219,6 +258,63 @@ subs = [
 ]
 out = build.apply_substitutions('mcp__shelf__consult and mcp__other__tool', 'codex', subs)
 assert out == 'SPECIFIC and GENERIC', out
+print('OK')
+"
+
+echo ""
+echo "=== 単体: 本番 hosts.toml の個別置換規則 ==="
+# 以降は fixture ではなく本番の generators/hosts.toml を読む。置換規則の追加・順序変更が
+# 意図どおり効くか（特に汎用 ~/.claude 置換に先に消費されないか）を固定するため。
+assert_py "reference 引用（~/.claude/reference/<name>.md）は配布元リポジトリの reference/<name>.md 案内になる(codex/gemini)" "
+$PY_IMPORT_BUILD
+from pathlib import Path
+subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
+src = '詳細は \`~/.claude/reference/lesson-promotion.md\` を参照'
+for host in ('codex', 'gemini'):
+    out = build.apply_substitutions(src, host, subs)
+    assert out == '詳細は \`reference/lesson-promotion.md\`（配布元リポジトリ） を参照', (host, out)
+print('OK')
+"
+
+assert_py "SendMessage(Claude専用ツール名)は置換されて残らない" "
+$PY_IMPORT_BUILD
+from pathlib import Path
+subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
+for host in ('codex', 'gemini'):
+    out = build.apply_substitutions('追送は SendMessage で行う', host, subs)
+    assert 'SendMessage' not in out, (host, out)
+    assert '追送機構（存在する場合）' in out, (host, out)
+print('OK')
+"
+
+assert_py "backtick付き maxTurns(agent frontmatter概念)はターン上限に置換される" "
+$PY_IMPORT_BUILD
+from pathlib import Path
+subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
+for host in ('codex', 'gemini'):
+    out = build.apply_substitutions('\`maxTurns\` を超えたら停止', host, subs)
+    assert 'maxTurns' not in out, (host, out)
+    assert out == 'ターン上限を超えたら停止', (host, out)
+print('OK')
+"
+
+assert_py "skills配下の複数形 references/ パスは置換規則の対象外(変化しない)" "
+$PY_IMPORT_BUILD
+from pathlib import Path
+subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
+src = '手順は \`references/checklist.md\` を読む'
+for host in ('codex', 'gemini'):
+    assert build.apply_substitutions(src, host, subs) == src, host
+print('OK')
+"
+
+assert_py "Fable は Tier S モデル に置換される" "
+$PY_IMPORT_BUILD
+from pathlib import Path
+subs = build.load_substitutions(Path('$REPO_ROOT/generators/hosts.toml'))
+for host in ('codex', 'gemini'):
+    out = build.apply_substitutions('Fable が判断する', host, subs)
+    assert out == 'Tier S モデル が判断する', (host, out)
 print('OK')
 "
 
@@ -530,6 +626,16 @@ REAL_OUT2="$WORKDIR/real-out2"
 python3 "$BUILD_PY" --out-dir "$REAL_OUT2" >/dev/null 2>&1
 real_diff="$(diff -r "$REAL_OUT1" "$REAL_OUT2" 2>&1)" || true
 assert_contains "実リポジトリbuildも冪等(2回目と差分なし)" "$([ -z "$real_diff" ] && echo NO_DIFF || echo "$real_diff")" "NO_DIFF"
+
+# フェンス漏れ検出: strip_host_fences が除去しそこねた host:claude マーカーや、
+# 小文字のモデルID(claude-fable 等)が生成物へ漏れていないこと。lint(LINT_PATTERNS_FULL)は
+# これらを見ないため、selftest 側で固定する。
+for leak_file in AGENTS.md GEMINI.md; do
+  leak_text="$(cat "$REAL_OUT1/$leak_file")"
+  for leak_word in 'host:claude' 'claude-fable' 'claude-opus' 'claude-sonnet' 'claude-haiku'; do
+    assert_not_contains "フェンス/モデルID漏れ検出: $leak_file に $leak_word が無い" "$leak_text" "$leak_word"
+  done
+done
 
 echo ""
 echo "=== 本番dist/への実書き込み(既定引数)がexit 0であること ==="

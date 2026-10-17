@@ -8,6 +8,30 @@
 
 ### Added
 - `hooks/approve-safe-rm.sh`: 既知の安全な `rm -rf`（ビルドキャッシュ whitelist・自セッション scratchpad）のみを自動承認する PreToolUse(Bash) hook。姉妹の private リポジトリで反証検証6ラウンドを経て確定した設計を移植（ADR-004）
+- rules 04（思考原則・構えの選択の判断基盤）/ 05（発火チェックリスト）/ 95（委譲の規律と、論理ロールを provider ごとのモデルへ対応づける表）。姉妹の private リポジトリで実証済みの改善を移植
+- `reference/`（4 本）: 「トリガと義務」本文から切り出した手順書。`rules/` 配下に置くと常時ロードされトークンを消費するため、rules の外に置き、installer が `~/.claude/reference` へ symlink する（ADR-005）
+- skill `long-running-tasks`: 複数セッションにまたがる長期タスクの開始・再開・中断を、進捗ファイルと git で引き継ぐ
+- 正準ブロック `trial-report`（試行報告の欄構成）: ブロックは 7 種 × 27 箇所になった
+- `generators/check-private-refs.sh`: 個人識別子の混入を dist と配布物から検査する（CI に組込み、回帰テスト付き）
+- `generators/hosts.toml` の置換規則: reference 案内・SendMessage・maxTurns を provider ごとに置換
+- `generators/selftest.sh`: host フェンスの閉じ漏れ・dist への漏出を検出する検査
+
+### Changed
+- core rule 9 本（00/02/03/12/13/30/50/93/94）を再同期。本文は「トリガと義務」に絞り、手順は `reference/` へ移した
+- `rules/02`: ティア定義を運用上の許可範囲として書き直し、ピン表を 5.1/5.5 世代へ更新。Claude 向けの表は `host:claude` フェンスで囲む
+- `rules/hosts/claude` を解消: 91/92 を top-level へ移し、01 は `claude/CLAUDE.core.md` の「動作制約」節へ統合
+- `claude/CLAUDE.core.md` を、分岐表ではなく「構え」を選ぶ層として書き換え
+- skills 4 本を slim 化（`SKILL.md` + `references/` へ分割）
+- agents 8 本: description を英語 1 行へ、`maxTurns` を追加、`memory: user` を削除、読取り専用 agent に `disallowedTools` を付与。effort/model の方針を変更（検証役 opus/high、レビュー系 sonnet/high、実装系 sonnet/medium、`test-runner` haiku/low）。根拠は ADR-005
+- 正準ブロック `trial-log-reviewer` を追記（`trial-report` と対）
+- `antipattern-axes` ブロックの検査対象を `references/checklist.md` へ移動
+- `hosts.toml` の `Fable` 置換先を Tier S モデルへ変更
+- `rules/00`: 原則 3 は「検証をもって完了とする」に据え置き（TDD は採用者の個人嗜好として核に含めない）、原則 1 は「ロールバックしてよい（fix-forward 可）」に追従、優先度行は「改訂はユーザー承認と PR 経由」に変更（ADR-005 (e)）
+- `rules/94`: 教訓の保存先を `~/.claude/lessons/inbox/` とし、昇格の自動適用は採用者の明示許可時のみとした（ADR-005 (f)）
+- `installer/manifest.json` に `reference` の symlink entry を追加し、`README.md`・`CONTRIBUTING.md` を更新
+
+### Removed
+- `rules/hosts/claude/*`（01/02/91/92）。内容は top-level の rule と `CLAUDE.core.md` に統合済み
 
 ## [0.5.0] - 2026-07-25
 

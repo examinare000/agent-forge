@@ -133,7 +133,7 @@ build_fake_repo() {
   local case_name="$1" extra_filter="${2:-.}"
   local repo="${WORKDIR}/${case_name}/repo"
   local home="${WORKDIR}/${case_name}/home"
-  mkdir -p "${repo}/installer/lib" "${repo}/agents" "${repo}/hooks" "${repo}/skills" "${repo}/rules" "${repo}/claude"
+  mkdir -p "${repo}/installer/lib" "${repo}/agents" "${repo}/hooks" "${repo}/skills" "${repo}/rules" "${repo}/reference" "${repo}/claude"
   mkdir -p "${home}"
 
   cp "${SCRIPT_DIR}/lib/common.sh" "${repo}/installer/lib/common.sh"
@@ -145,6 +145,7 @@ build_fake_repo() {
   echo "dummy hook" > "${repo}/hooks/dummy-hook.sh"
   echo "dummy skill" > "${repo}/skills/dummy-skill.md"
   echo "dummy rule" > "${repo}/rules/00-core-principles.md"
+  echo "dummy reference" > "${repo}/reference/dummy-reference.md"
   echo "# dummy CLAUDE.core.md" > "${repo}/claude/CLAUDE.core.md"
   echo '{"model": "dummy"}' > "${repo}/claude/settings.base.json"
 
@@ -177,6 +178,7 @@ assert_symlink_target "agents: 絶対パスsymlink" "${home}/.claude/agents" "${
 assert_symlink_target "hooks: 絶対パスsymlink" "${home}/.claude/hooks" "${repo}/hooks"
 assert_symlink_target "skills: 絶対パスsymlink" "${home}/.claude/skills" "${repo}/skills"
 assert_symlink_target "rules: 絶対パスsymlink" "${home}/.claude/rules" "${repo}/rules"
+assert_symlink_target "reference: 絶対パスsymlink" "${home}/.claude/reference" "${repo}/reference"
 assert_symlink_target "CLAUDE.core.md: 絶対パスsymlink" "${home}/.claude/CLAUDE.core.md" "${repo}/claude/CLAUDE.core.md"
 
 if [ -f "${home}/.claude/settings.json" ]; then
@@ -297,7 +299,7 @@ run_install "${repo}" "${home}" --uninstall >/dev/null
 rc5=$?
 assert_rc "--uninstall: exit 0" 0 "${rc5}"
 
-for name in agents hooks skills rules CLAUDE.core.md; do
+for name in agents hooks skills rules reference CLAUDE.core.md; do
   if [ -e "${home}/.claude/${name}" ] || [ -L "${home}/.claude/${name}" ]; then
     echo "FAIL: --uninstall後もsymlinkが残っている: ${name}"
     fail=$((fail + 1))

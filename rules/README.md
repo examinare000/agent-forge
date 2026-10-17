@@ -1,6 +1,6 @@
 # Agent Rules Index
 AIエージェントが一貫した品質で作業するためのルールセット。
-`rules/` 直下は全ホスト（Claude Code / Codex / Gemini）共通の規範、`hosts/<host>/` は各ホスト固有機構。
+`rules/` 直下は全ホスト（Claude Code / Codex / Gemini）共通の規範。
 installer により `~/.claude/rules/` へ配置される。
 
 ## 優先順位ルール
@@ -11,8 +11,10 @@ installer により `~/.claude/rules/` へ配置される。
 
 ### レイヤー0: 基盤原則（00-09）
 - **`00-core-principles.md` (🔴 絶対 / 全員)**: デグレ防止、日本語使用、検証をもって完了とする原則。
-- **`02-model-fallback-matrix.md` (🔴 絶対 / 全員)**: モデルティア定義（Tier A/B/C・ベンダー中立）、標準運用の義務と降格時の追加義務、格下げ順序、自己ティア判定（**正本**。ホスト別の具体マッピングは `hosts/<host>/02-*.md`）。
-- **`03-agent-behavior.md` (🟠 高 / 全員)**: プラン、応答、ファイル操作、検証、委譲と検証の原則、モデル別補足。
+- **`02-model-fallback-matrix.md` (🔴 絶対 / 全員)**: ティア定義（ベンダー中立）、Claude の ID・ピン表（host:claude フェンス内）、標準運用の義務と降格時の追加義務、格下げ順序、自己ティア判定（**正本**）。資料: `reference/model-id-update-points.md`。
+- **`03-agent-behavior.md` (🟠 高 / 全員)**: 思考の大原則、応答、実行・検証（接地クエリ・掃引・完了主張）、エスカレーション。資料: `reference/sweep-blind-spots.md`。
+- **`04-principles.md` (恒常参照・非規範 / 全員)**: 思考原則・金言集。義務を課さない判断の構え層。
+- **`05-stance-and-triggers.md` (🔴 絶対 / 全員)**: **判断の構えとハードトリガの正本**。機構を持たない provider の縮退経路もここが唯一の正本。
 
 ### レイヤー1: ワークフロー（10-29）
 - **`12-security-guidelines.md` (🟠 高 / 全員)**: シークレット管理、入力検証、認証情報ログ出力禁止、エラーメッセージ情報漏洩防止。
@@ -29,19 +31,33 @@ installer により `~/.claude/rules/` へ配置される。
 - **本フレームワークでは意図的に空欄**。採用者が自分の言語/環境固有規約（Docker・フロントエンド設計等）をここに追加する。
 
 ### レイヤー5: 特殊戦略（90-）
+- **`91-subagent-quality-gate.md` (🔴 最高 / 連携用)**: サブエージェント品質ゲート（明示モード）。REJECT ループの終了条件、多数決、フック迂回禁止。
+- **`92-plan-mode-protocol.md` (🔴 最高 / 計画立案時)**: 計画立案の薄い参照層。手続き本体は Skill `plan-deep-research`。
 - **`93-deep-reasoning-protocol.md` (🔴 最高 / 発火時)**: 深い推論の薄い参照層。手続き本体は Skill `deep-reasoning`。非自明タスク全てで発火（全メイン共通）。他モードと排他ではなく重ねて適用。
 - **`94-self-improvement-protocol.md` (🟠 高 / 全員)**: 自己成長プロトコル。バグ・レビュー指摘・ユーザー訂正の教訓キャプチャと、skill/rules/hook/memory への昇格基準。手続き本体は Skill `retrospect`（別頒布の recall リポジトリ同梱・optional）。
+- **`95-orchestration-protocol.md` (🔴 最高 / 委譲時)**: 委譲の規律（自己完結ブリーフ・出力契約・質問返し）、委譲先の選定表、論理ロールと同梱エージェントの対応表（**正本**）。資料: `reference/delegation-routes.md`。
 
-### ホスト固有: `hosts/claude/`（Claude Code 専用）
-- **`hosts/claude/01-claude-behavior.md` (🟠 高)**: TodoWrite、レスポンス制約、プロアクティブ制限。
-- **`hosts/claude/02-model-fallback-matrix.md` (🔴 絶対)**: ティア ↔ Claude モデル対応表、同梱エージェントのモデルピン、降格手順（正本は直下の 02）。
-- **`hosts/claude/91-claude-subagent-coding.md` (🔴 最高 / サブエージェント使用時)**: Claude サブエージェント品質ゲート戦略（Task ツール起動・git-composer 委譲）。
-- **`hosts/claude/92-plan-mode-protocol.md` (🔴 最高 / plan mode時)**: plan mode発火の薄い参照層。手続き本体は Skill `plan-deep-research`。
+Claude 固有の動作制約は `claude/CLAUDE.core.md`「動作制約」節が正本。手順・例示・経緯は `reference/`。
+
+## ルールと資料
+番号付きファイルは「トリガと義務」を持つルール。`reference/` は手順・例示・環境の実体・経緯を置く資料で、ルールから参照された時だけ読む（義務を課さない）。
+
+## ホスト別の適用マトリクス
+「縮退」は義務の免除ではなく、同じ義務を別の手段で果たすこと（正本: `05-stance-and-triggers.md`）。
+
+| ルール | Claude | Codex | Gemini |
+|---|---|---|---|
+| `00` `03` `04` `05` `95` と採用者追加の 10-29・70-89 | 適用 | 適用 | 適用 |
+| `02-model-fallback-matrix.md` | 適用（host:claude 節を含む全体） | 適用（クロスベンダー節・義務の代替） | 適用（同左） |
+| `91-subagent-quality-gate.md` | 適用 | 適用 | 縮退（native subagent 不在） |
+| `92-plan-mode-protocol.md` | plan mode 突入時 | 縮退（計画依頼時点で発火） | 縮退（同左） |
+| `93` Skill 手順書 | Skill としてロード | Skill としてロード | 縮退（`SKILL.md` を直読） |
+| `94-self-improvement-protocol.md` | キャプチャ〜昇格 | 縮退（キャプチャは義務、昇格は引き継ぎ） | 縮退（同左） |
 
 ## 運用の要点＆新規追加
 - **運用**: 変更は小さく段階的に実施。危険操作は事前に目的・影響・ロールバック策を宣言する。
 - **報告**: 作業前にプランを提示、終了時は「変更ファイル」「検証方法」「次の一手」を簡潔に提示。
-- **追加**: 00-09（基盤）、10-29（ワークフロー）、30-49（管理）、50-69（品質）、70-89（環境）、90-（特殊）。ホスト固有機構は `hosts/<host>/` へ。
+- **追加**: 00-09（基盤）、10-29（ワークフロー）、30-49（管理）、50-69（品質）、70-89（環境）、90-（特殊）。
 - **空欄は意図的**: `10-29`・`70-89` に空いている番号は埋め忘れではなく、本フレームワークが意図的に予約している空欄。採用者が自分の工学規約（git戦略・テスト戦略・言語/環境固有規約等）を追加する受け皿。注: 12/13 など本体が使用中の番号もある。
 - **環境**: 全ファイル UTF-8 / LF 厳守。
 

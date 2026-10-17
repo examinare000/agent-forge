@@ -4,6 +4,7 @@
     { "name": "hooks", "repoPath": "hooks", "claudePath": "hooks" },
     { "name": "skills", "repoPath": "skills", "claudePath": "skills" },
     { "name": "rules", "repoPath": "rules", "claudePath": "rules" },
+    { "name": "reference", "repoPath": "reference", "claudePath": "reference" },
     { "name": "CLAUDE.core.md", "repoPath": "claude/CLAUDE.core.md", "claudePath": "CLAUDE.core.md" }
   ],
   "repos": {

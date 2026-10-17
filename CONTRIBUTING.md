@@ -24,6 +24,10 @@ bash installer/install.test.sh
 
 # evals のテスト
 bash evals/harness-selftest.sh
+
+# 私有リポジトリ由来の個人識別子の混入検査とそのテスト
+bash generators/check-private-refs.sh
+bash generators/check-private-refs.test.sh
 ```
 
 ## ブランチ運用
