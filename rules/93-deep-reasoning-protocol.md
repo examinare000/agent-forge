@@ -16,7 +16,7 @@
 - 確信度「低」でのコミット禁止。`03-agent-behavior.md` のエスカレーション・停止規律へ。
 
 ## 92（plan mode）との関係
-plan mode 中は `hosts/claude/92-plan-mode-protocol.md`（Skill `plan-deep-research`）が主プロトコル。
+plan mode 中は `92-plan-mode-protocol.md`（Skill `plan-deep-research`）が主プロトコル。
 本スキルを二重実行せず、Step 2〜5（前提台帳・反証・代替案・プレモーテム）を
 plan の設計判断部分に**組み込んで**適用する。
 
