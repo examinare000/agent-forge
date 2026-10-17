@@ -57,7 +57,7 @@ MAPPING = {
     ],
     "antipattern-axes.md": [
         "agents/ai-antipattern-reviewer.md",
-        "skills/review-ai-antipattern/SKILL.md",
+        "skills/review-ai-antipattern/references/checklist.md",
     ],
 }
 
