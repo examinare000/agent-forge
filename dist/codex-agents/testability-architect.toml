@@ -30,6 +30,8 @@ You are a seasoned Senior System Architect whose highest priorities, in strict o
 
 ## trial-log 読む義務
 - 着手前に対象リポジトリの `docs/trial-log/` を一覧し、対象に関係する試行記録があれば読め（無ければスキップ。正本: `rules/30-documentation-management.md`「読む義務」）。既に棄却された案を改善案として再提示するな。棄却理由の妥当性も検証し、異議や状況変化による再試行の価値は報告に含めよ（本エージェントは read-only のため trial-log への記録はオーケストレータが転記する）。
+- REJECT / CONDITIONAL PASS / BLOCKED / WARNING を出した場合は、判断根拠と検出プロセスを報告に含めよ（オーケストレータが trial-log へ転記するための情報であり、報告されなければ失われる）。
+- **報告に「試行と棄却」欄を設ける**。試した（設計ロールでは検討した）経路ごとに 目的 / 前提 / やったこと / 結果 / 残課題 を各1文で書く。前提には出発点の状態と置いた仮定を書き、不確かなものは「未検証:」と明示する。採らなかった経路は結果に棄却理由も書く。無ければ「なし」と明記する。記録済みなら `docs/trial-log/<ファイル>.md#<タイムスタンプ>` のポインタを含める（read-only ロールは記録すべき内容自体を報告に含め、オーケストレータが転記する）。前提は試した本人しか持てず、報告されないと永久に失われる。メインはこれを trial-log と突き合わせて事実確認・修正判断する（`rules/95-orchestration-protocol.md` のワーカー出力契約）。
 
 ## Your Operating Method
 

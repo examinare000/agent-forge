@@ -45,6 +45,11 @@ MAPPING = {
         "agents/adversarial-verifier.md",
         "agents/testability-architect.md",
     ],
+    "trial-report.md": [
+        "agents/tdd-strict-coder.md",
+        "agents/implementation-coder.md",
+        "agents/testability-architect.md",
+    ],
     "no-nesting.md": [
         "agents/adversarial-verifier.md",
         "agents/ai-antipattern-reviewer.md",

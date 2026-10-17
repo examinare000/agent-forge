@@ -661,8 +661,9 @@ provider の入口で Main をオーケストレーターとする分担が指�
 | `deep-reasoning` | 難易度の高いタスク（設計判断・非可逆操作・曖昧な要求・修正失敗後）で、問題再述→前提台帳→仮説と反証→代替案比較→プレモーテムを機械的に実行する深い推論の手続き。「設計して」「どう思う」「難しい問題」依頼時、および非自明タスク（発火チェックリスト 1 項目以上該当）全てで使用。 |
 | `dual-track-proposals` | Use when delegating a non-trivial implementation task — multiple plausible approaches, novel design surface, or a prior failed attempt. |
 | `frontend-design` | Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics. |
+| `long-running-tasks` | 複数セッションにまたがる長期タスク（1セッションで完了しない見込み、または他セッションへの引き継ぎが必要）の開始時・再開時・中断時に使用する。進捗ファイルとgitでセッション間の状態を引き継ぐ。 |
 | `plan-deep-research` | plan mode（計画立案）でplannerペルソナを採り、Explorerサブエージェントを並列起動して調査し、エージェント実行計画を策定する手続き。計画・設計・「プランを立てて」依頼時に使用。 |
-| `review-ai-antipattern` | 作業差分（git diff / 直近の実装変更）を専用 reviewer サブエージェントに委譲し、AI が混入させがちなアンチパターン（スコープ逸脱・過剰設計・未完了の偽装・表層 slop・幻覚API/整合性）を path:line 根拠付きで検出する手続き。実装差分を生成した全タスクで完了宣言前に必須（依頼の有無によらず。正本: GEMINI.md 内の該当節・GEMINI.md 内の該当節）。「AIアンチパターンをレビュー」「slopチェック」等の明示依頼時にも使用。 |
-| `trial-log` | 開発中の試行記録（docs/trial-log/）を live-docs として運用する手続き。作業開始・再開時に読み、試行を1つ終えるたび・アプローチを切り替えたとき・レビューでREJECTを受けたとき・目的が変わったときに追記する。「同じ失敗を繰り返す」「長い作業の途中で目的を見失う」「過去に棄却した案を再提案する」の防止に使う。 |
+| `review-ai-antipattern` | 作業差分を専用 reviewer サブエージェントに委譲し、AI が混入させがちなアンチパターン（スコープ逸脱・過剰設計・未完了の偽装・表層 slop・幻覚 API）を path:line 根拠付きで検出する手続き。「AI アンチパターンをレビュー」「slop チェック」の明示依頼時、および `GEMINI.md 内の該当節` の品質ゲートで Worker 差分を完了扱いにする前に使う。バグ・正確性のレビュー（/code-review）には使わない。 |
+| `trial-log` | 開発中の試行記録（docs/trial-log/）を live-docs として運用する手続き。作業開始・再開時に読み、試行を1つ終える・アプローチを切り替える・REJECT を受ける・目的が変わるたびに追記する。同じ失敗の繰り返し、長い作業での目的喪失、棄却済み案の再提案を防ぐ。 |
 
 各スキルの本文は配布元リポジトリの `skills/<name>/SKILL.md` を参照（本ファイルには索引のみ掲載）。

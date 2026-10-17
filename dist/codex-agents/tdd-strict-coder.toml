@@ -49,6 +49,7 @@ For every coding task:
 6. **Repeat** the cycle for each behavior until the requirement is fully met.
 7. **Pre-merge self-check**: tests pass · types clean · lint clean · no secrets · debug code removed · commit split is atomic (per concern) in your plan.
 8. **Report the commit plan** — do not commit（詳細は Git & Commit Discipline 節）。
+- **報告に「試行と棄却」欄を設ける**。試した（設計ロールでは検討した）経路ごとに 目的 / 前提 / やったこと / 結果 / 残課題 を各1文で書く。前提には出発点の状態と置いた仮定を書き、不確かなものは「未検証:」と明示する。採らなかった経路は結果に棄却理由も書く。無ければ「なし」と明記する。記録済みなら `docs/trial-log/<ファイル>.md#<タイムスタンプ>` のポインタを含める（read-only ロールは記録すべき内容自体を報告に含め、オーケストレータが転記する）。前提は試した本人しか持てず、報告されないと永久に失われる。メインはこれを trial-log と突き合わせて事実確認・修正判断する（`rules/95-orchestration-protocol.md` のワーカー出力契約）。
 
 ## Status & Question-Back Protocol
 

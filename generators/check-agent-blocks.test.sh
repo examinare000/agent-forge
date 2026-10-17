@@ -91,7 +91,7 @@ cp -R "$REPO_ROOT/generators" "$TEST_REPO_1/"
 
 assert_result "無改変複製で exit 0 を返す" \
   0 "$TEST_REPO_1" \
-  "agent-blocks: 6 blocks × 24 targets OK" \
+  "agent-blocks: 7 blocks × 27 targets OK" \
   ""
 
 # ============================================================
@@ -252,6 +252,30 @@ assert_result "対象内にブロックが重複していると exit 1" \
   1 "$TEST_REPO_7" \
   "" \
   "重複"
+
+# ============================================================
+# テスト8: trial-report ブロックを対象から1つ欠落させると exit 1
+# ============================================================
+TEST_REPO_8="$TMP_ROOT/test-repo-8"
+mkdir -p "$TEST_REPO_8"
+cp -R "$REPO_ROOT/agents" "$TEST_REPO_8/"
+cp -R "$REPO_ROOT/skills" "$TEST_REPO_8/"
+cp -R "$REPO_ROOT/generators" "$TEST_REPO_8/"
+
+# agents/tdd-strict-coder.md から trial-report ブロック本文を取り除く（「試行と棄却」欄の義務が coder から抜け落ちるドリフトの検知）
+python3 - "$TEST_REPO_8/generators/agent-blocks/trial-report.md" "$TEST_REPO_8/agents/tdd-strict-coder.md" <<'PY'
+import sys
+block_path, target_path = sys.argv[1], sys.argv[2]
+block_text = open(block_path, encoding="utf-8").read().rstrip("\n")
+text = open(target_path, encoding="utf-8").read()
+assert block_text in text
+open(target_path, "w", encoding="utf-8").write(text.replace(block_text, "", 1))
+PY
+
+assert_result "trial-report ブロックを欠落させると exit 1" \
+  1 "$TEST_REPO_8" \
+  "" \
+  "trial-report.md: agents/tdd-strict-coder.md"
 
 # ============================================================
 # 結果集計
