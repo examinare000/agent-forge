@@ -214,6 +214,24 @@ else
   fail=$((fail + 1))
 fi
 
+# --- シェルスクリプト: 変数直後の多バイト文字（bash は変数名に取り込み、値が黙って消える） ---
+# shellcheck disable=SC2016  # 検査対象として $var を文字どおり書き込むため
+sh_bad="$TMP_ROOT/bad.sh"
+printf '#!/bin/bash\nrole=x\necho "$role（担当）"\n' > "$sh_bad"
+assert_exit "sh: \$var の直後に多バイト文字 -> exit 2 で行番号と brace 助言" \
+  2 "$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$sh_bad")")" \
+  "" \
+  "bad.sh:3"
+assert_exit "sh: 助言に \${var} 形式を示す" \
+  2 "$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$sh_bad")")" \
+  "" \
+  '${var}'
+
+sh_ok="$TMP_ROOT/ok.sh"
+printf '#!/bin/bash\nrole=x\necho "${role}（担当）"\necho "$role (ok)"\necho "合計 $role"\n' > "$sh_ok"
+assert_exit "sh: brace 形式・ASCII 直後・多バイト前置は誤爆しない -> exit 0" \
+  0 "$(printf '{"tool_input":{"file_path":%s}}' "$(json_escape "$sh_ok")")"
+
 echo "----"
 echo "pass=$pass fail=$fail"
 [ "$fail" -eq 0 ]

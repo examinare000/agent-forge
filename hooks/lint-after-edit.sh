@@ -119,6 +119,18 @@ case "$ext" in
       fi
     fi
     ;;
+  sh)
+    # bash は UTF-8 の多バイト列を変数名の一部として読むため、`$var` の直後が非 ASCII だと
+    # 別名を参照し、set -u が無ければ値が黙って消える（無症状クラス）。巡回検査や
+    # チェックリストでは再発を止められなかったため、書いた直後に同じ正規表現で助言する。
+    hits="$(LC_ALL=C grep -nE '\$[A-Za-z_][A-Za-z0-9_]*[^[:space:][:print:]]' "$file" 2>/dev/null || true)"
+    if [ -n "$hits" ]; then
+      output="$(printf '%s\n' "$hits" | sed "s|^|${file##*/}:|")"
+      output="$output
+変数展開の直後に多バイト文字が続いています。\${var} の brace 形式にしてください（例: \"\${role}（担当）\"）。"
+      status=1
+    fi
+    ;;
   *)
     exit 0
     ;;
